@@ -2,7 +2,7 @@
 
 Merges benchmark_*.json files into benchmark_comparison.json and renders
 Markdown tables comparing 1-thread SIMD and N-thread scaling profiles.
-Labels differences within combined standard error as "Parity / Within Noise".
+Labels differences within 2.0 * SE_diff as "Parity / Within Noise".
 """
 
 import argparse
@@ -14,27 +14,45 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 
+def is_baseline_label(label: str) -> bool:
+    """Check if label indicates baseline or unoptimized run."""
+    low = label.lower()
+    return any(k in low for k in ["unoptimized", "baseline", "x86"])
+
+
 def format_cell(mean_ms: float, std_ms: float) -> str:
     """Format mean +/- std."""
     return f"{mean_ms:.2f} +/- {std_ms:.2f} ms"
 
 
 def compute_comparison_verdict(
-    mean_base: float, std_base: float, mean_test: float, std_test: float
+    mean_base: float,
+    std_base: float,
+    n_base: int,
+    mean_opt: float,
+    std_opt: float,
+    n_opt: int,
 ) -> Tuple[float, str]:
-    """Compute speedup ratio and verify if difference is outside combined standard error."""
-    diff = abs(mean_base - mean_test)
-    combined_stderr = math.sqrt(std_base**2 + std_test**2)
+    """Compute speedup ratio as T_base / T_opt and assess standard error difference.
+    
+    Speedup = T_base / T_opt.
+    SE_diff = sqrt(std_base^2 / n_base + std_opt^2 / n_opt).
+    Only label 'Parity / Within Noise' if |T_base - T_opt| < 2.0 * SE_diff.
+    """
+    diff = abs(mean_base - mean_opt)
+    n_b = max(1, n_base)
+    n_o = max(1, n_opt)
+    se_diff = math.sqrt((std_base ** 2) / n_b + (std_opt ** 2) / n_o)
 
-    speedup = round(mean_base / max(1e-6, mean_test), 2)
-    if diff <= combined_stderr:
+    speedup = round(mean_base / max(1e-6, mean_opt), 2)
+    if diff < 2.0 * se_diff:
         verdict = f"{speedup:.2f}x (Parity / Within Noise)"
-    elif mean_test < mean_base:
-        pct_faster = round(((mean_base - mean_test) / mean_base) * 100.0, 1)
-        verdict = f"{speedup:.2f}x (+{pct_faster}% faster)"
+    elif mean_opt < mean_base:
+        pct_latency = round(((mean_base - mean_opt) / max(1e-6, mean_base)) * 100.0, 1)
+        verdict = f"{speedup:.2f}x faster (-{pct_latency:.1f}% latency)"
     else:
-        pct_slower = round(((mean_test - mean_base) / mean_base) * 100.0, 1)
-        verdict = f"{speedup:.2f}x (-{pct_slower}% slower)"
+        pct_slower = round(((mean_opt - mean_base) / max(1e-6, mean_base)) * 100.0, 1)
+        verdict = f"{speedup:.2f}x slower (+{pct_slower:.1f}% latency)"
     return speedup, verdict
 
 
@@ -59,10 +77,20 @@ def render_markdown_table(
         ("total_pipeline_ms", "Total Pipeline Inspection"),
     ]
 
-    labels = [r.get("label", f"Run {idx}") for idx, r in enumerate(runs)]
-    header = ["Inspection Stage"] + labels
+    # If 2 runs, arrange [optimized_run, baseline_run]
     if len(runs) == 2:
-        header.append(f"Speedup ({labels[1]} vs {labels[0]})")
+        r0, r1 = runs[0], runs[1]
+        if is_baseline_label(r0.get("label", "")) and not is_baseline_label(r1.get("label", "")):
+            ordered_runs = [r1, r0]
+        else:
+            ordered_runs = [r0, r1]
+    else:
+        ordered_runs = runs
+
+    labels = [r.get("label", f"Run {idx}") for idx, r in enumerate(ordered_runs)]
+    header = ["Inspection Stage"] + labels
+    if len(ordered_runs) == 2:
+        header.append(f"Speedup ({labels[0]} vs {labels[1]})")
 
     lines = []
     lines.append("| " + " | ".join(header) + " |")
@@ -71,42 +99,53 @@ def render_markdown_table(
     for stage_key, stage_title in stages:
         row = [stage_title]
         stats_list = []
-        for r in runs:
+        n_list = []
+        for r in ordered_runs:
             prof = r.get(profile_key, {}).get("stages", {})
             st_data = prof.get(stage_key, {})
             mean_ms = st_data.get("mean_ms", 0.0)
             std_ms = st_data.get("std_ms", 0.0)
             stats_list.append((mean_ms, std_ms))
+            n_list.append(r.get(profile_key, {}).get("timed_iterations", 30))
             row.append(format_cell(mean_ms, std_ms))
 
-        if len(runs) == 2:
-            m0, s0 = stats_list[0]
-            m1, s1 = stats_list[1]
-            _, verdict = compute_comparison_verdict(m0, s0, m1, s1)
+        if len(ordered_runs) == 2:
+            m_opt, s_opt = stats_list[0]
+            n_opt = n_list[0]
+            m_base, s_base = stats_list[1]
+            n_base = n_list[1]
+            _, verdict = compute_comparison_verdict(
+                mean_base=m_base,
+                std_base=s_base,
+                n_base=n_base,
+                mean_opt=m_opt,
+                std_opt=s_opt,
+                n_opt=n_opt,
+            )
             row.append(verdict)
 
         lines.append("| " + " | ".join(row) + " |")
 
     # Add Throughput and Peak RSS rows
     fps_row = ["Throughput (FPS)"]
-    for r in runs:
+    for r in ordered_runs:
         fps = r.get(profile_key, {}).get("throughput_fps", 0.0)
         fps_row.append(f"{fps:.1f} fps")
-    if len(runs) == 2:
-        fps_base = runs[0].get(profile_key, {}).get("throughput_fps", 0.0)
-        fps_test = runs[1].get(profile_key, {}).get("throughput_fps", 0.0)
-        ratio = round(fps_test / max(1e-6, fps_base), 2)
+    if len(ordered_runs) == 2:
+        fps_opt = ordered_runs[0].get(profile_key, {}).get("throughput_fps", 0.0)
+        fps_base = ordered_runs[1].get(profile_key, {}).get("throughput_fps", 0.0)
+        ratio = round(fps_opt / max(1e-6, fps_base), 2)
         fps_row.append(f"{ratio:.2f}x throughput")
     lines.append("| " + " | ".join(fps_row) + " |")
 
     rss_row = ["Peak RSS Memory (MB)"]
-    for r in runs:
+    for r in ordered_runs:
         rss = r.get(profile_key, {}).get("peak_rss_mb", 0.0)
         rss_row.append(f"{rss:.1f} MB")
-    if len(runs) == 2:
-        rss_base = runs[0].get(profile_key, {}).get("peak_rss_mb", 0.0)
-        rss_test = runs[1].get(profile_key, {}).get("peak_rss_mb", 0.0)
-        diff_mb = round(rss_test - rss_base, 1)
+    if len(ordered_runs) == 2:
+        rss_opt = ordered_runs[0].get(profile_key, {}).get("peak_rss_mb", 0.0)
+        rss_base = ordered_runs[1].get(profile_key, {}).get("peak_rss_mb", 0.0)
+        diff_mb = round(rss_opt - rss_base, 1)
         rss_row.append(f"{diff_mb:+.1f} MB delta")
     lines.append("| " + " | ".join(rss_row) + " |")
 
@@ -139,6 +178,14 @@ def compare_benchmarks(
     if not runs:
         print("[INFO] No valid benchmark runs loaded.")
         return None
+
+    # Order runs: [optimized_run, baseline_run] if exactly 2
+    if len(runs) == 2:
+        r0, r1 = runs[0], runs[1]
+        if is_baseline_label(r0.get("label", "")) and not is_baseline_label(r1.get("label", "")):
+            runs = [r1, r0]
+        else:
+            runs = [r0, r1]
 
     table_1thread = render_markdown_table("profile_1thread", runs)
     table_nthread = render_markdown_table("profile_nthread", runs)

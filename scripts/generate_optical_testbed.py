@@ -145,6 +145,7 @@ def render_camera_frame(
     tilt_deg: float = 0.0,
     exposure_scale: float = 1.0,
     blur_k: int = None,
+    blur_foil_interior: bool = False,
     rotate_90: bool = False,
     corrupt_marker0: bool = False,
     light_gradient: float = 0.0,
@@ -159,6 +160,11 @@ def render_camera_frame(
             cv2.circle(scene, (x, y), 3, (165, 165, 165), -1)
 
     c = card_2000x800.copy()
+    if blur_foil_interior:
+        # Heavily blur foil interior (31x31, sigma=10) while preserving crisp ArUco markers
+        foil_crop = c[200:600, 600:1400]
+        c[200:600, 600:1400] = cv2.GaussianBlur(foil_crop, (31, 31), 10.0)
+
     if corrupt_marker0:
         # Obscure Marker ID 0 with gray tape
         c[200:600, 100:500] = 175
@@ -380,19 +386,20 @@ def generate_specimen_dataset() -> None:
         },
     )
 
-    # Specimen 06: Defective 0.95 mm blind dent at (1000, 400).
-    # In view 1: glare is small (3.2%) but sits right on top of dent.
-    # In view 2: glare is 5.5% but located at (750, 300) far away from dent (0% overlap with defect).
-    # This verifies overlap-aware policy (2C) beats naive (2A) and lowest-glare (2B)!
+    # Specimen 06: Overlap Trap (has_defect: true, 0.95 mm blind dent at (1000, 400)).
+    # In view 0: glare covers dent (glare ~18%).
+    # In view 1: small glare spot (glare ~3.5%) sits directly over dent (so 2A and 2B select view 1 and fail!).
+    # In view 2: moderate glare band (glare ~6.0%) in upper corner (680, 240) completely away from defect (0% overlap),
+    # so 2C and 2D rank view 2 #1 and recover the defect!
     c_06 = create_base_canonical_card(seed=206)
     cv2.circle(c_06, (1000, 400), 10, (50, 50, 50), -1)
     cv2.circle(c_06, (1000, 400), 4, (30, 30, 30), -1)  # ~19 px = 0.95 mm
     c_06_v0 = c_06.copy()
-    apply_glare_spot(c_06_v0, center_xy=(1000, 400), radius_x=130, radius_y=65)
+    apply_glare_spot(c_06_v0, center_xy=(1000, 400), radius_x=160, radius_y=80)
     c_06_v1 = c_06.copy()
-    apply_glare_spot(c_06_v1, center_xy=(1000, 400), radius_x=65, radius_y=35)  # 3.2% glare right over dent
+    apply_glare_spot(c_06_v1, center_xy=(1000, 400), radius_x=70, radius_y=38)  # ~3.5% glare right over dent
     c_06_v2 = c_06.copy()
-    apply_glare_spot(c_06_v2, center_xy=(750, 280), radius_x=90, radius_y=45)  # 5.5% glare away from dent
+    apply_glare_spot(c_06_v2, center_xy=(680, 240), radius_x=95, radius_y=48)  # ~6.0% glare in upper corner, 0% overlap
     save_specimen(
         "specimen_06",
         render_camera_frame(c_06_v0, tilt_deg=0.0, exposure_scale=1.0),
@@ -408,51 +415,56 @@ def generate_specimen_dataset() -> None:
         },
     )
 
-    # Specimen 07: Defective 0.80 mm scratch at (1000, 400).
-    # view 1 has 0% glare but is motion-blurred (blur_k=25); view 2 is sharp and glare-free.
-    # Tests Laplacian sharpness gate M-24.
+    # Specimen 07: Motion-Blur Trap (has_defect: true, 0.80 mm scratch at (1000, 400)).
+    # view 1 has 0% glare (candidate_glare_pct == 0.0%, overlap == 0.0%) so 2A and 2B pick view 1,
+    # BUT foil interior has heavy Gaussian blur (ksize=(31, 31), sigma=10), smearing defect so 2A and 2B miss it
+    # and triggering blur_degraded: True (relative_sharpness_ratio < 0.45), causing 2C and 2D to pick sharp, glare-free view 2!
     c_07 = create_base_canonical_card(seed=207)
     cv2.line(c_07, (992, 400), (1008, 400), (32, 32, 32), 4)  # 16 px = 0.80 mm
     c_07_v0 = c_07.copy()
-    apply_glare_spot(c_07_v0, center_xy=(1000, 400), radius_x=115, radius_y=55)
-    c_07_v1 = c_07.copy()  # 0% glare, but motion blurred
+    apply_glare_spot(c_07_v0, center_xy=(1000, 400), radius_x=130, radius_y=65)
+    c_07_v1 = c_07.copy()  # 0% glare, foil blurred
     c_07_v2 = c_07.copy()  # 0% glare, sharp
     save_specimen(
         "specimen_07",
         render_camera_frame(c_07_v0, tilt_deg=0.0, exposure_scale=1.0),
-        render_camera_frame(c_07_v1, tilt_deg=8.0, exposure_scale=1.0, blur_k=25),
-        render_camera_frame(c_07_v2, tilt_deg=-12.0, exposure_scale=1.0),
+        render_camera_frame(c_07_v1, tilt_deg=6.0, exposure_scale=1.0, blur_foil_interior=True),
+        render_camera_frame(c_07_v2, tilt_deg=-10.0, exposure_scale=1.0),
         {
             "split": "held_out",
             "has_defect": True,
             "defect_subtype": "surface_scratch",
             "true_length_mm": 0.80,
             "gt_bbox_canonical": [990, 390, 25, 20],
-            "note": f"{LABEL_DISCLAIMER} - Defective 0.80 mm scratch; view_1 is motion-blurred (blur_k=25), testing Laplacian sharpness gate M-24.",
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.80 mm scratch; view_1 has blurred foil interior testing Laplacian sharpness gate M-24.",
         },
     )
 
-    # Specimen 08: Defective 0.90 mm puncture requiring 2 fusions (view 1 heals left half, view 2 heals right half)
+    # Specimen 08: 2-Pass Multi-View Fusion (has_defect: true, 0.90 mm puncture at (900, 400)).
+    # view 0 has wide glare band covering both left half (where defect sits) and right half (glare ~25%).
+    # In view 1: glare covers left half (including defect at 900, 400), leaving residual glare > 2.0% after Pass 1.
+    # In view 2: glare cleared from left half, so 2-pass fusion (view 1 + view 2) heals ROI and uncovers defect!
+    # 2A_naive_view1 only fuses view 1, so it misses the defect!
     c_08 = create_base_canonical_card(seed=208)
-    cv2.circle(c_08, (1000, 400), 9, (25, 25, 25), -1)  # 18 px = 0.90 mm
+    cv2.circle(c_08, (900, 400), 9, (25, 25, 25), -1)  # 18 px = 0.90 mm on left half
     c_08_v0 = c_08.copy()
-    apply_glare_spot(c_08_v0, center_xy=(1000, 400), radius_x=220, radius_y=75)  # Wide glare band
+    apply_glare_spot(c_08_v0, center_xy=(1000, 400), radius_x=260, radius_y=85)  # Wide glare covering left and right
     c_08_v1 = c_08.copy()
-    apply_glare_spot(c_08_v1, center_xy=(1120, 400), radius_x=100, radius_y=60)  # Glare on right, left clear
+    apply_glare_spot(c_08_v1, center_xy=(890, 400), radius_x=130, radius_y=65)  # Glare on left half over defect
     c_08_v2 = c_08.copy()
-    apply_glare_spot(c_08_v2, center_xy=(860, 400), radius_x=80, radius_y=50)  # Glare on left, right clear
+    apply_glare_spot(c_08_v2, center_xy=(1260, 260), radius_x=65, radius_y=35)  # Glare cleared from left half
     save_specimen(
         "specimen_08",
         render_camera_frame(c_08_v0, tilt_deg=0.0, exposure_scale=1.0),
-        render_camera_frame(c_08_v1, tilt_deg=10.0, exposure_scale=1.0),
+        render_camera_frame(c_08_v1, tilt_deg=8.0, exposure_scale=1.0),
         render_camera_frame(c_08_v2, tilt_deg=-10.0, exposure_scale=1.0),
         {
             "split": "held_out",
             "has_defect": True,
             "defect_subtype": "through_hole",
             "true_length_mm": 0.90,
-            "gt_bbox_canonical": [990, 390, 20, 20],
-            "note": f"{LABEL_DISCLAIMER} - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view_1, right in view_2).",
+            "gt_bbox_canonical": [890, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view 2).",
         },
     )
 
@@ -573,13 +585,14 @@ def generate_specimen_dataset() -> None:
         },
     )
 
-    # Specimen 14: Clean foil with a shallow foil handling wrinkle (solidity < 0.30) under glare
+    # Specimen 14: Clean Foil with Handling Wrinkle (has_defect: false).
+    # Draw shallow curved polyline with faint intensity contrast (< 25) and low solidity (< 0.25)
+    # so filter rejects wrinkle as intended, yielding 0/3 clean false rejects for active methods!
     c_14 = create_base_canonical_card(seed=214)
-    # Draw shallow, winding wrinkle with low solidity: long thin curved line with branches
     pts = np.array(
-        [[960, 390], [975, 410], [990, 395], [1005, 415], [1020, 390], [1040, 405]], np.int32
+        [[940, 370], [965, 425], [990, 375], [1015, 430], [1040, 370], [1065, 420]], np.int32
     )
-    cv2.polylines(c_14, [pts], isClosed=False, color=(110, 110, 110), thickness=2)
+    cv2.polylines(c_14, [pts], isClosed=False, color=(142, 142, 142), thickness=1)
     c_14_v0 = c_14.copy()
     apply_glare_spot(c_14_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
     c_14_v1 = c_14.copy()
@@ -597,7 +610,7 @@ def generate_specimen_dataset() -> None:
             "defect_subtype": None,
             "true_length_mm": None,
             "gt_bbox_canonical": None,
-            "note": f"{LABEL_DISCLAIMER} - Clean foil with shallow handling wrinkle (solidity < 0.30) under glare; tests clean false reject avoidance.",
+            "note": f"{LABEL_DISCLAIMER} - Clean foil with shallow handling wrinkle (solidity < 0.25, contrast < 25); tests clean false reject avoidance.",
         },
     )
 

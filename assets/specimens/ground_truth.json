@@ -78,7 +78,7 @@
       25,
       20
     ],
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.80 mm scratch; view_1 is motion-blurred (blur_k=25), testing Laplacian sharpness gate M-24."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.80 mm scratch; view_1 has blurred foil interior testing Laplacian sharpness gate M-24."
   },
   "specimen_08": {
     "split": "held_out",
@@ -86,12 +86,12 @@
     "defect_subtype": "through_hole",
     "true_length_mm": 0.9,
     "gt_bbox_canonical": [
-      990,
+      890,
       390,
       20,
       20
     ],
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view_1, right in view_2)."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view 2)."
   },
   "specimen_09": {
     "split": "held_out",
@@ -154,6 +154,6 @@
     "defect_subtype": null,
     "true_length_mm": null,
     "gt_bbox_canonical": null,
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil with shallow handling wrinkle (solidity < 0.30) under glare; tests clean false reject avoidance."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil with shallow handling wrinkle (solidity < 0.25, contrast < 25); tests clean false reject avoidance."
   }
 }

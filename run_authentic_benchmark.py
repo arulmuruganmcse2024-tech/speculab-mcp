@@ -146,10 +146,13 @@ def run_profile(
 ) -> Dict[str, Any]:
     """Run benchmark iterations under a specific thread setting."""
     cv2.setNumThreads(thread_count)
+    cv2.setRNGSeed(42)
 
     # Warmup
     for _ in range(warmup_iters):
         benchmark_single_iteration(engine, view0, view1)
+
+    cv2.setRNGSeed(42)
 
     # Timed runs
     records: Dict[str, List[float]] = {
@@ -227,15 +230,20 @@ def run_benchmark(
         v1_img[200:600, 600:1400] = 175  # Slightly shifted exposure
 
     orig_opt = cv2.useOptimized()
-    if disable_cv_opt:
-        cv2.setUseOptimized(False)
+    # Explicitly configure SIMD optimization state BEFORE any warmups or executions
+    cv2.setUseOptimized(not disable_cv_opt)
 
     try:
+        runtime_meta = get_opencv_runtime_metadata()
         # Profile 1: Single-core (threads=1) for KleidiCV/SIMD isolation (M-29)
-        profile_1thread = run_profile(engine, v0_img, v1_img, thread_count=1, timed_iters=iterations)
+        profile_1thread = run_profile(
+            engine, v0_img, v1_img, thread_count=1, warmup_iters=5, timed_iters=iterations
+        )
 
         # Profile 2: Multi-core (threads=N) for multi-threaded scaling
-        profile_nthread = run_profile(engine, v0_img, v1_img, thread_count=threads, timed_iters=iterations)
+        profile_nthread = run_profile(
+            engine, v0_img, v1_img, thread_count=threads, warmup_iters=5, timed_iters=iterations
+        )
     finally:
         cv2.setUseOptimized(orig_opt)
 
@@ -264,7 +272,7 @@ def run_benchmark(
     report = {
         "label": label,
         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "opencv_runtime": get_opencv_runtime_metadata(),
+        "opencv_runtime": runtime_meta,
         "cost_analysis": cost_info,
         "profile_1thread": profile_1thread,
         "profile_nthread": profile_nthread,
