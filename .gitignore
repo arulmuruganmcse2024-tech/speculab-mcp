@@ -1,0 +1,21 @@
+# Python & virtual environments
+__pycache__/
+*.pyc
+.pytest_cache/
+venv*/
+.venv/
+.env
+tmp_smoke_test/
+*.mp4
+.DS_Store
+
+# Logs and runtime artifacts
+logs/*.jsonl
+logs/*.json
+logs/*.txt
+logs/global_llm_quota.json
+logs/cached_bedrock_runs/
+!logs/.gitkeep
+
+# Specimen ground truth and images (keep .gitkeep)
+!assets/specimens/.gitkeep

@@ -1,0 +1,1 @@
+"""SpecuLab-MCP source package."""

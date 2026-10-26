@@ -1,0 +1,63 @@
+calibration:
+  marker_0_id: 0
+  marker_1_id: 1
+  marker_size_mm: 20.0
+  canvas_width_px: 2000
+  canvas_height_px: 800
+  default_roi: [600, 200, 800, 400]
+
+glare:
+  core_val_thresh: 240
+  core_sat_thresh: 35
+  penumbra_min_val: 210
+  penumbra_median_offset: 35
+  penumbra_sat_thresh: 50
+  seed_dilation_px: 21
+  final_dilation_px: 9
+  default_gate_pct: 2.0
+
+sharpness:
+  min_relative_sharpness_ratio: 0.45
+
+healing:
+  orb_nfeatures: 1500
+  min_non_marker_inliers: 10
+  usac_reproj_thresh_px: 1.5
+  pre_feather_dilation_px: 11
+  feather_kernel_px: 21
+  feather_sigma: 5.0
+  gain_clip_min: 0.60
+  gain_clip_max: 1.60
+  low_overlap_clip_min: 0.75
+  low_overlap_clip_max: 1.35
+
+detection:
+  roi_border_margin_px: 12
+  median_blur_px: 5
+  morph_kernel_px: 61
+  morph_intensity_thresh: 30
+  min_area_px: 14.0
+  min_solidity: 0.35
+  min_peak_contrast: 42.0
+  min_defect_length_mm: 0.35
+
+optional_features:
+  enable_nbv_pose_prediction: false
+  enable_2d_illumination_field_gain: false
+  enable_ecc_subpixel_refinement: false
+  enable_seam_rollback: false
+
+agent:
+  max_view_attempts: 2
+  default_region: "us-east-1"
+  default_model_id: "us.amazon.nova-lite-v1:0"
+  cloudwatch_log_group: "/aws/opencv2026/speculab-mcp"
+  input_token_cost_per_1m_usd: 0.06 # [VERIFY ON AWS BEDROCK PRICING PAGE]
+  output_token_cost_per_1m_usd: 0.24 # [VERIFY ON AWS BEDROCK PRICING PAGE]
+  quotas:
+    public_anonymous_per_hour: 15
+    public_anonymous_per_day: 50
+    judge_vip_per_hour: 100
+    judge_vip_per_day: 300
+    cli_evaluation_per_hour: 100
+    cli_evaluation_per_day: 300
