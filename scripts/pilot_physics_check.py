@@ -14,6 +14,8 @@ from typing import Any, Dict, List, Tuple
 import cv2
 import numpy as np
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from scripts.generate_printable_card import generate_card
 from src.vision_engine import PlanarActiveVisionEngine, load_image_exif_safe
 

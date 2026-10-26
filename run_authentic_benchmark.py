@@ -198,6 +198,8 @@ def run_benchmark(
     label: str,
     specimens_dir: str = "assets/specimens",
     threads: int = 4,
+    iterations: int = 30,
+    disable_cv_opt: bool = False,
     hourly_cost: float = 0.0,
     output_path: Optional[str] = None,
 ) -> Dict[str, Any]:
@@ -224,11 +226,18 @@ def run_benchmark(
         v1_img = v0_img.copy()
         v1_img[200:600, 600:1400] = 175  # Slightly shifted exposure
 
-    # Profile 1: Single-core (threads=1) for KleidiCV/SIMD isolation (M-29)
-    profile_1thread = run_profile(engine, v0_img, v1_img, thread_count=1)
+    orig_opt = cv2.useOptimized()
+    if disable_cv_opt:
+        cv2.setUseOptimized(False)
 
-    # Profile 2: Multi-core (threads=N) for multi-threaded scaling
-    profile_nthread = run_profile(engine, v0_img, v1_img, thread_count=threads)
+    try:
+        # Profile 1: Single-core (threads=1) for KleidiCV/SIMD isolation (M-29)
+        profile_1thread = run_profile(engine, v0_img, v1_img, thread_count=1, timed_iters=iterations)
+
+        # Profile 2: Multi-core (threads=N) for multi-threaded scaling
+        profile_nthread = run_profile(engine, v0_img, v1_img, thread_count=threads, timed_iters=iterations)
+    finally:
+        cv2.setUseOptimized(orig_opt)
 
     # Cost calculations (D5: Unpriced when --hourly-cost == 0)
     cost_info: Dict[str, Any] = {}
@@ -276,6 +285,8 @@ def main() -> None:
     parser.add_argument("--label", type=str, default="authentic_run", help="Benchmark run identifier")
     parser.add_argument("--specimens-dir", type=str, default="assets/specimens", help="Specimens directory")
     parser.add_argument("--threads", type=int, default=4, help="Thread count for multi-thread profile")
+    parser.add_argument("--iterations", type=int, default=30, help="Number of timed benchmark iterations")
+    parser.add_argument("--disable-cv-opt", action="store_true", help="Disable OpenCV SIMD hardware optimizations")
     parser.add_argument("--hourly-cost", type=float, default=0.0, help="EC2 instance hourly cost in USD (0.0 = unpriced)")
     parser.add_argument("--output", type=str, default=None, help="Output JSON path")
     args = parser.parse_args()
@@ -284,6 +295,8 @@ def main() -> None:
         label=args.label,
         specimens_dir=args.specimens_dir,
         threads=args.threads,
+        iterations=args.iterations,
+        disable_cv_opt=args.disable_cv_opt,
         hourly_cost=args.hourly_cost,
         output_path=args.output,
     )

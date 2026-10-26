@@ -2,18 +2,34 @@
 
 import argparse
 import json
+import os
+import sys
 import cv2
 import numpy as np
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.vision_engine import PlanarActiveVisionEngine, load_image_exif_safe
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Dump candidate contours and metrics")
-    parser.add_argument("--image", type=str, required=True, help="Input image path")
+    parser.add_argument(
+        "--image",
+        type=str,
+        default="assets/specimens/specimen_01/view_1.jpg",
+        help="Input image path (defaults to specimen_01 view_1.jpg)",
+    )
     parser.add_argument("--thresh", type=int, default=30, help="Morphology threshold")
-    parser.add_argument("--output-json", type=str, default="logs/dumped_contours.json", help="Output JSON path")
+    parser.add_argument(
+        "--output-json",
+        type=str,
+        default="logs/tuning_contours_dump.json",
+        help="Output JSON path",
+    )
     args = parser.parse_args()
+
+    os.makedirs(os.path.dirname(os.path.abspath(args.output_json)), exist_ok=True)
 
     engine = PlanarActiveVisionEngine("config.yaml")
     img = load_image_exif_safe(args.image)

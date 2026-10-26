@@ -1,0 +1,623 @@
+"""Deterministic Procedural Optical Testbed Generator for SpecuLab-MCP.
+
+Generates:
+1. Pilot pair: assets/pilot/pilot_view_0.jpg and assets/pilot/pilot_view_1.jpg (2400 x 1200)
+2. 14 Specimen sets: assets/specimens/specimen_01 .. specimen_14 (3 views each at 2400 x 1200)
+3. assets/specimens/ground_truth.json (Strict Amendment 4 schema)
+
+Strict Honesty Labeling:
+Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic
+Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo)
+"""
+
+import json
+import math
+import os
+import random
+import sys
+import cv2
+import numpy as np
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from scripts.generate_printable_card import create_aruco_marker, draw_deterministic_orb_texture
+
+
+LABEL_DISCLAIMER = (
+    "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, "
+    "Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo)"
+)
+
+
+def create_base_canonical_card(seed: int = 42) -> np.ndarray:
+    """Generate canonical 2000x800 calibration card with realistic brushed foil."""
+    rng = np.random.RandomState(seed)
+    canvas_w = 2000
+    canvas_h = 800
+    canvas = np.full((canvas_h, canvas_w, 3), 255, dtype=np.uint8)
+
+    # 1. Outer border
+    cv2.rectangle(canvas, (0, 0), (canvas_w - 1, canvas_h - 1), (0, 0, 0), 2)
+
+    # 2. Place ArUco Marker ID 0 at x=100..500, y=200..600
+    m0 = create_aruco_marker(marker_id=0, size_px=400)
+    canvas[200:600, 100:500] = cv2.cvtColor(m0, cv2.COLOR_GRAY2BGR)
+    cv2.putText(
+        canvas, "ARUCO ID 0 (PRIMARY METRIC)", (100, 185), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 0), 2, cv2.LINE_AA
+    )
+
+    # 3. Place ArUco Marker ID 1 at x=1500..1900, y=200..600
+    m1 = create_aruco_marker(marker_id=1, size_px=400)
+    canvas[200:600, 1500:1900] = cv2.cvtColor(m1, cv2.COLOR_GRAY2BGR)
+    cv2.putText(
+        canvas, "ARUCO ID 1 (DUAL-MARKER 8PT)", (1500, 185), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 0), 2, cv2.LINE_AA
+    )
+
+    # 4. ORB texture bands
+    draw_deterministic_orb_texture(canvas, 100, 1900, 40, 160, seed=seed)
+    draw_deterministic_orb_texture(canvas, 100, 1900, 640, 760, seed=seed + 101)
+
+    # 5. Foil inspection window (600, 200) to (1400, 600) with anisotropic brushed texture
+    foil_x, foil_y, foil_w, foil_h = 600, 200, 800, 400
+    base_foil = np.full((foil_h, foil_w, 3), 158, dtype=np.uint8)
+
+    # Anisotropic horizontal brushed grain
+    grain_lines = rng.normal(0, 3.5, size=(foil_h, 1, 1)).astype(np.float32)
+    grain = np.tile(grain_lines, (1, foil_w, 3))
+    grain_noise = rng.normal(0, 2.0, size=(foil_h, foil_w, 3)).astype(np.float32)
+    foil_textured = np.clip(base_foil.astype(np.float32) + grain + grain_noise, 120, 190).astype(np.uint8)
+
+    canvas[foil_y : foil_y + foil_h, foil_x : foil_x + foil_w] = foil_textured
+    cv2.rectangle(canvas, (foil_x, foil_y), (foil_x + foil_w, foil_y + foil_h), (0, 0, 0), 2)
+
+    return canvas
+
+
+def apply_glare_spot(
+    canvas: np.ndarray,
+    center_xy: tuple,
+    radius_x: int,
+    radius_y: int,
+    angle_deg: float = 0.0,
+    core_ratio: float = 0.55,
+) -> None:
+    """Apply realistic specular glare spot with saturated core (V=252) and penumbra halo (V=222)."""
+    cx, cy = center_xy
+    roi_x0 = max(0, cx - radius_x - 10)
+    roi_x1 = min(canvas.shape[1], cx + radius_x + 10)
+    roi_y0 = max(0, cy - radius_y - 10)
+    roi_y1 = min(canvas.shape[0], cy + radius_y + 10)
+
+    if roi_x1 <= roi_x0 or roi_y1 <= roi_y0:
+        return
+
+    sub_img = canvas[roi_y0:roi_y1, roi_x0:roi_x1].copy()
+    h, w = sub_img.shape[:2]
+    mask_penumbra = np.zeros((h, w), dtype=np.uint8)
+    mask_core = np.zeros((h, w), dtype=np.uint8)
+
+    rel_cx = cx - roi_x0
+    rel_cy = cy - roi_y0
+
+    # Draw penumbra halo
+    cv2.ellipse(
+        mask_penumbra,
+        (rel_cx, rel_cy),
+        (radius_x, radius_y),
+        angle_deg,
+        0,
+        360,
+        255,
+        -1,
+    )
+
+    # Draw core
+    core_rx = max(4, int(radius_x * core_ratio))
+    core_ry = max(4, int(radius_y * core_ratio))
+    cv2.ellipse(
+        mask_core,
+        (rel_cx, rel_cy),
+        (core_rx, core_ry),
+        angle_deg,
+        0,
+        360,
+        255,
+        -1,
+    )
+
+    # Blend penumbra: V=222, S=15
+    penumbra_bgr = np.full((h, w, 3), 222, dtype=np.uint8)
+    # Blend core: V=252, S=10
+    core_bgr = np.full((h, w, 3), 252, dtype=np.uint8)
+
+    pen_feather = cv2.GaussianBlur(mask_penumbra.astype(np.float32) / 255.0, (15, 15), 4.0)
+    core_feather = cv2.GaussianBlur(mask_core.astype(np.float32) / 255.0, (11, 11), 3.0)
+
+    # Composite
+    blended = sub_img.astype(np.float32) * (1.0 - pen_feather[..., None]) + penumbra_bgr.astype(np.float32) * pen_feather[..., None]
+    blended = blended * (1.0 - core_feather[..., None]) + core_bgr.astype(np.float32) * core_feather[..., None]
+
+    canvas[roi_y0:roi_y1, roi_x0:roi_x1] = np.clip(blended, 0, 255).astype(np.uint8)
+
+
+def render_camera_frame(
+    card_2000x800: np.ndarray,
+    tilt_deg: float = 0.0,
+    exposure_scale: float = 1.0,
+    blur_k: int = None,
+    rotate_90: bool = False,
+    corrupt_marker0: bool = False,
+    light_gradient: float = 0.0,
+) -> np.ndarray:
+    """Embed card into full-resolution 2400 x 1200 scene with realistic optical physics."""
+    h_bg, w_bg = 1200, 2400
+    scene = np.full((h_bg, w_bg, 3), 195, dtype=np.uint8)
+
+    # Anodized aluminum optical table texture
+    for y in range(40, h_bg, 80):
+        for x in range(40, w_bg, 80):
+            cv2.circle(scene, (x, y), 3, (165, 165, 165), -1)
+
+    c = card_2000x800.copy()
+    if corrupt_marker0:
+        # Obscure Marker ID 0 with gray tape
+        c[200:600, 100:500] = 175
+
+    scene[200:1000, 200:2200] = c
+
+    # Perspective tilt homography
+    if tilt_deg != 0.0:
+        src = np.float32([[200, 200], [2200, 200], [2200, 1000], [200, 1000]])
+        shift = int(np.tan(np.radians(abs(tilt_deg))) * 260)
+        if tilt_deg > 0:
+            dst = np.float32(
+                [
+                    [200 + shift, 200 + shift // 3],
+                    [2200 - shift // 3, 200],
+                    [2200 - shift // 3, 1000],
+                    [200 + shift, 1000 - shift // 3],
+                ]
+            )
+        else:
+            dst = np.float32(
+                [
+                    [200 + shift // 3, 200],
+                    [2200 - shift, 200 + shift // 3],
+                    [2200 - shift, 1000 - shift // 3],
+                    [200 + shift // 3, 1000],
+                ]
+            )
+        H = cv2.getPerspectiveTransform(src, dst)
+        scene = cv2.warpPerspective(scene, H, (w_bg, h_bg), borderValue=(195, 195, 195))
+
+    # Lighting gradient across scene
+    if light_gradient != 0.0:
+        grad_x = np.linspace(1.0 - light_gradient / 2.0, 1.0 + light_gradient / 2.0, w_bg, dtype=np.float32)
+        scene = np.clip(scene.astype(np.float32) * grad_x[None, :, None], 0, 255).astype(np.uint8)
+
+    # Exposure scaling
+    if exposure_scale != 1.0:
+        scene = np.clip(scene.astype(np.float32) * exposure_scale, 0, 255).astype(np.uint8)
+
+    # Motion / defocus blur
+    if blur_k is not None and blur_k > 1:
+        scene = cv2.GaussianBlur(scene, (blur_k, blur_k), 0)
+
+    # 90-degree portrait orientation
+    if rotate_90:
+        scene = cv2.rotate(scene, cv2.ROTATE_90_CLOCKWISE)
+
+    return scene
+
+
+def generate_pilot_dataset() -> None:
+    """Generate assets/pilot/pilot_view_0.jpg and pilot_view_1.jpg."""
+    os.makedirs("assets/pilot", exist_ok=True)
+    card_base = create_base_canonical_card(seed=101)
+
+    # Zone A (x=800, y=400) - through-hole puncture: 1.2 mm (24 px) dark hole
+    cv2.circle(card_base, (800, 400), 12, (25, 25, 25), -1)
+
+    # Zone B (x=1000, y=400) - blind pin dent: 1.0 mm (20 px) depression
+    cv2.circle(card_base, (1000, 400), 10, (50, 50, 50), -1)
+    cv2.circle(card_base, (1000, 400), 4, (30, 30, 30), -1)
+
+    # Zone C (x=1200, y=400) - surface scratch: 1.5 mm (30 px) furrow
+    cv2.line(card_base, (1185, 400), (1215, 400), (32, 32, 32), 4)
+
+    # View 0: Saturated glare band covering Zones A, B, and C
+    card_v0 = card_base.copy()
+    apply_glare_spot(card_v0, center_xy=(1000, 400), radius_x=280, radius_y=75, angle_deg=5.0)
+    view_0 = render_camera_frame(card_v0, tilt_deg=0.0, exposure_scale=1.0)
+    cv2.imwrite("assets/pilot/pilot_view_0.jpg", view_0, [cv2.IMWRITE_JPEG_QUALITY, 96])
+
+    # View 1: Shift glare band off all three zones, +12 deg tilt and 1.12 exposure
+    card_v1 = card_base.copy()
+    apply_glare_spot(card_v1, center_xy=(700, 260), radius_x=90, radius_y=45, angle_deg=-10.0)
+    view_1 = render_camera_frame(card_v1, tilt_deg=12.0, exposure_scale=1.12)
+    cv2.imwrite("assets/pilot/pilot_view_1.jpg", view_1, [cv2.IMWRITE_JPEG_QUALITY, 96])
+
+    print("[OK] Generated assets/pilot/ (pilot_view_0.jpg and pilot_view_1.jpg)")
+
+
+def generate_specimen_dataset() -> None:
+    """Generate assets/specimens/specimen_01..14 with ground_truth.json."""
+    os.makedirs("assets/specimens", exist_ok=True)
+    gt_entries = {}
+
+    # Helper to save 3 views
+    def save_specimen(sid: str, v0: np.ndarray, v1: np.ndarray, v2: np.ndarray, meta: dict):
+        s_dir = os.path.join("assets/specimens", sid)
+        os.makedirs(s_dir, exist_ok=True)
+        cv2.imwrite(os.path.join(s_dir, "view_0.jpg"), v0, [cv2.IMWRITE_JPEG_QUALITY, 96])
+        cv2.imwrite(os.path.join(s_dir, "view_1.jpg"), v1, [cv2.IMWRITE_JPEG_QUALITY, 96])
+        cv2.imwrite(os.path.join(s_dir, "view_2.jpg"), v2, [cv2.IMWRITE_JPEG_QUALITY, 96])
+        gt_entries[sid] = meta
+
+    # =========================================================================
+    # Tuning Specimens (1 to 4)
+    # =========================================================================
+
+    # Specimen 01: Defective 0.85 mm through-hole at (950, 400), glare in view 0, cleared in view 1 (+14 deg, 0.90 exp)
+    c_01 = create_base_canonical_card(seed=201)
+    cv2.circle(c_01, (950, 400), 9, (25, 25, 25), -1)  # ~17 px = 0.85 mm
+    c_01_v0 = c_01.copy()
+    apply_glare_spot(c_01_v0, center_xy=(950, 400), radius_x=120, radius_y=55)
+    c_01_v1 = c_01.copy()
+    apply_glare_spot(c_01_v1, center_xy=(750, 270), radius_x=80, radius_y=40)
+    c_01_v2 = c_01.copy()
+    apply_glare_spot(c_01_v2, center_xy=(1250, 520), radius_x=70, radius_y=35)
+    save_specimen(
+        "specimen_01",
+        render_camera_frame(c_01_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_01_v1, tilt_deg=14.0, exposure_scale=0.90),
+        render_camera_frame(c_01_v2, tilt_deg=-10.0, exposure_scale=1.05),
+        {
+            "split": "tuning",
+            "has_defect": True,
+            "defect_subtype": "through_hole",
+            "true_length_mm": 0.85,
+            "gt_bbox_canonical": [940, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.85 mm puncture at (950, 400), hidden under glare in view_0, cleared in view_1 (+14 deg warp, 0.90 exp).",
+        },
+    )
+
+    # Specimen 02: Defective 1.10 mm surface scratch at (1050, 380), cleared in view 2 (-15 deg, 1.08 exp)
+    c_02 = create_base_canonical_card(seed=202)
+    cv2.line(c_02, (1039, 380), (1061, 380), (30, 30, 30), 4)  # 22 px = 1.10 mm
+    c_02_v0 = c_02.copy()
+    apply_glare_spot(c_02_v0, center_xy=(1050, 380), radius_x=130, radius_y=60)
+    c_02_v1 = c_02.copy()
+    apply_glare_spot(c_02_v1, center_xy=(1070, 390), radius_x=90, radius_y=50)  # Partially occluding
+    c_02_v2 = c_02.copy()
+    apply_glare_spot(c_02_v2, center_xy=(750, 260), radius_x=70, radius_y=35)  # Cleared
+    save_specimen(
+        "specimen_02",
+        render_camera_frame(c_02_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_02_v1, tilt_deg=8.0, exposure_scale=1.0),
+        render_camera_frame(c_02_v2, tilt_deg=-15.0, exposure_scale=1.08),
+        {
+            "split": "tuning",
+            "has_defect": True,
+            "defect_subtype": "surface_scratch",
+            "true_length_mm": 1.10,
+            "gt_bbox_canonical": [1035, 370, 30, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 1.10 mm scratch at (1050, 380), occluded in view_0, partial in view_1, cleared in view_2 (-15 deg warp, 1.08 exp).",
+        },
+    )
+
+    # Specimen 03: Clean foil with heavy glare and sharp rim contrast in view 0, cleared in view 1
+    c_03 = create_base_canonical_card(seed=203)
+    c_03_v0 = c_03.copy()
+    apply_glare_spot(c_03_v0, center_xy=(1000, 400), radius_x=160, radius_y=80, core_ratio=0.7)
+    c_03_v1 = c_03.copy()
+    apply_glare_spot(c_03_v1, center_xy=(700, 250), radius_x=60, radius_y=30)
+    c_03_v2 = c_03.copy()
+    apply_glare_spot(c_03_v2, center_xy=(1300, 550), radius_x=60, radius_y=30)
+    save_specimen(
+        "specimen_03",
+        render_camera_frame(c_03_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_03_v1, tilt_deg=10.0, exposure_scale=1.0),
+        render_camera_frame(c_03_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "tuning",
+            "has_defect": False,
+            "defect_subtype": None,
+            "true_length_mm": None,
+            "gt_bbox_canonical": None,
+            "note": f"{LABEL_DISCLAIMER} - Clean foil with heavy glare and sharp rim contrast in view_0, cleared in view_1.",
+        },
+    )
+
+    # Specimen 04: Clean foil with moderate glare and 15% lighting gradient shift
+    c_04 = create_base_canonical_card(seed=204)
+    c_04_v0 = c_04.copy()
+    apply_glare_spot(c_04_v0, center_xy=(900, 380), radius_x=110, radius_y=50)
+    c_04_v1 = c_04.copy()
+    apply_glare_spot(c_04_v1, center_xy=(1200, 480), radius_x=70, radius_y=35)
+    c_04_v2 = c_04.copy()
+    apply_glare_spot(c_04_v2, center_xy=(750, 250), radius_x=60, radius_y=30)
+    save_specimen(
+        "specimen_04",
+        render_camera_frame(c_04_v0, tilt_deg=0.0, exposure_scale=1.0, light_gradient=0.0),
+        render_camera_frame(c_04_v1, tilt_deg=10.0, exposure_scale=1.0, light_gradient=0.15),
+        render_camera_frame(c_04_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "tuning",
+            "has_defect": False,
+            "defect_subtype": None,
+            "true_length_mm": None,
+            "gt_bbox_canonical": None,
+            "note": f"{LABEL_DISCLAIMER} - Clean foil with moderate glare and a 15% lighting gradient shift between view_0 and view_1.",
+        },
+    )
+
+    # =========================================================================
+    # Held-Out Specimens (5 to 14)
+    # =========================================================================
+
+    # Specimen 05: Defective 0.75 mm puncture at (980, 400), hidden under glare in view 0, cleared in view 1
+    c_05 = create_base_canonical_card(seed=205)
+    cv2.circle(c_05, (980, 400), 8, (25, 25, 25), -1)  # ~15 px = 0.75 mm
+    c_05_v0 = c_05.copy()
+    apply_glare_spot(c_05_v0, center_xy=(980, 400), radius_x=120, radius_y=60)
+    c_05_v1 = c_05.copy()
+    apply_glare_spot(c_05_v1, center_xy=(750, 250), radius_x=70, radius_y=35)
+    c_05_v2 = c_05.copy()
+    apply_glare_spot(c_05_v2, center_xy=(1250, 520), radius_x=70, radius_y=35)
+    save_specimen(
+        "specimen_05",
+        render_camera_frame(c_05_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_05_v1, tilt_deg=12.0, exposure_scale=0.95),
+        render_camera_frame(c_05_v2, tilt_deg=-12.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "through_hole",
+            "true_length_mm": 0.75,
+            "gt_bbox_canonical": [970, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.75 mm puncture, hidden under glare in view_0, cleared in view_1.",
+        },
+    )
+
+    # Specimen 06: Defective 0.95 mm blind dent at (1000, 400).
+    # In view 1: glare is small (3.2%) but sits right on top of dent.
+    # In view 2: glare is 5.5% but located at (750, 300) far away from dent (0% overlap with defect).
+    # This verifies overlap-aware policy (2C) beats naive (2A) and lowest-glare (2B)!
+    c_06 = create_base_canonical_card(seed=206)
+    cv2.circle(c_06, (1000, 400), 10, (50, 50, 50), -1)
+    cv2.circle(c_06, (1000, 400), 4, (30, 30, 30), -1)  # ~19 px = 0.95 mm
+    c_06_v0 = c_06.copy()
+    apply_glare_spot(c_06_v0, center_xy=(1000, 400), radius_x=130, radius_y=65)
+    c_06_v1 = c_06.copy()
+    apply_glare_spot(c_06_v1, center_xy=(1000, 400), radius_x=65, radius_y=35)  # 3.2% glare right over dent
+    c_06_v2 = c_06.copy()
+    apply_glare_spot(c_06_v2, center_xy=(750, 280), radius_x=90, radius_y=45)  # 5.5% glare away from dent
+    save_specimen(
+        "specimen_06",
+        render_camera_frame(c_06_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_06_v1, tilt_deg=6.0, exposure_scale=1.0),
+        render_camera_frame(c_06_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "blind_pin_dent",
+            "true_length_mm": 0.95,
+            "gt_bbox_canonical": [990, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.95 mm blind dent at (1000, 400); tests overlap-aware 2C policy vs 2A and 2B.",
+        },
+    )
+
+    # Specimen 07: Defective 0.80 mm scratch at (1000, 400).
+    # view 1 has 0% glare but is motion-blurred (blur_k=25); view 2 is sharp and glare-free.
+    # Tests Laplacian sharpness gate M-24.
+    c_07 = create_base_canonical_card(seed=207)
+    cv2.line(c_07, (992, 400), (1008, 400), (32, 32, 32), 4)  # 16 px = 0.80 mm
+    c_07_v0 = c_07.copy()
+    apply_glare_spot(c_07_v0, center_xy=(1000, 400), radius_x=115, radius_y=55)
+    c_07_v1 = c_07.copy()  # 0% glare, but motion blurred
+    c_07_v2 = c_07.copy()  # 0% glare, sharp
+    save_specimen(
+        "specimen_07",
+        render_camera_frame(c_07_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_07_v1, tilt_deg=8.0, exposure_scale=1.0, blur_k=25),
+        render_camera_frame(c_07_v2, tilt_deg=-12.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "surface_scratch",
+            "true_length_mm": 0.80,
+            "gt_bbox_canonical": [990, 390, 25, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.80 mm scratch; view_1 is motion-blurred (blur_k=25), testing Laplacian sharpness gate M-24.",
+        },
+    )
+
+    # Specimen 08: Defective 0.90 mm puncture requiring 2 fusions (view 1 heals left half, view 2 heals right half)
+    c_08 = create_base_canonical_card(seed=208)
+    cv2.circle(c_08, (1000, 400), 9, (25, 25, 25), -1)  # 18 px = 0.90 mm
+    c_08_v0 = c_08.copy()
+    apply_glare_spot(c_08_v0, center_xy=(1000, 400), radius_x=220, radius_y=75)  # Wide glare band
+    c_08_v1 = c_08.copy()
+    apply_glare_spot(c_08_v1, center_xy=(1120, 400), radius_x=100, radius_y=60)  # Glare on right, left clear
+    c_08_v2 = c_08.copy()
+    apply_glare_spot(c_08_v2, center_xy=(860, 400), radius_x=80, radius_y=50)  # Glare on left, right clear
+    save_specimen(
+        "specimen_08",
+        render_camera_frame(c_08_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_08_v1, tilt_deg=10.0, exposure_scale=1.0),
+        render_camera_frame(c_08_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "through_hole",
+            "true_length_mm": 0.90,
+            "gt_bbox_canonical": [990, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view_1, right in view_2).",
+        },
+    )
+
+    # Specimen 09: Defective 0.65 mm pinhole under localized 1.2% glare causing passive disagreement trigger
+    c_09 = create_base_canonical_card(seed=209)
+    cv2.circle(c_09, (1000, 400), 7, (28, 28, 28), -1)  # ~13 px = 0.65 mm
+    c_09_v0 = c_09.copy()
+    apply_glare_spot(c_09_v0, center_xy=(995, 395), radius_x=45, radius_y=25)  # Localized ~1.2% glare over pinhole
+    c_09_v1 = c_09.copy()
+    apply_glare_spot(c_09_v1, center_xy=(750, 250), radius_x=50, radius_y=25)
+    c_09_v2 = c_09.copy()
+    apply_glare_spot(c_09_v2, center_xy=(1250, 550), radius_x=50, radius_y=25)
+    save_specimen(
+        "specimen_09",
+        render_camera_frame(c_09_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_09_v1, tilt_deg=10.0, exposure_scale=1.0),
+        render_camera_frame(c_09_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "through_hole",
+            "true_length_mm": 0.65,
+            "gt_bbox_canonical": [990, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.65 mm pinhole under 1.2% glare causing passive disagreement trigger.",
+        },
+    )
+
+    # Specimen 10: Defective 0.85 mm puncture with persistent omnidirectional glare in all 3 views -> ESCALATE
+    c_10 = create_base_canonical_card(seed=210)
+    cv2.circle(c_10, (1000, 400), 9, (25, 25, 25), -1)  # ~17 px = 0.85 mm
+    c_10_v0 = c_10.copy()
+    apply_glare_spot(c_10_v0, center_xy=(1000, 400), radius_x=160, radius_y=80)
+    c_10_v1 = c_10.copy()
+    apply_glare_spot(c_10_v1, center_xy=(1000, 400), radius_x=150, radius_y=75)
+    c_10_v2 = c_10.copy()
+    apply_glare_spot(c_10_v2, center_xy=(1000, 400), radius_x=155, radius_y=78)
+    save_specimen(
+        "specimen_10",
+        render_camera_frame(c_10_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_10_v1, tilt_deg=8.0, exposure_scale=1.0),
+        render_camera_frame(c_10_v2, tilt_deg=-8.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "through_hole",
+            "true_length_mm": 0.85,
+            "gt_bbox_canonical": [990, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.85 mm puncture with persistent omnidirectional glare across all views; tests ESCALATE_UNRESOLVED_OCCLUSION.",
+        },
+    )
+
+    # Specimen 11: Honest Active Miss Failure Case — 0.22 mm micro-dimple (below min resolution 0.35 mm)
+    c_11 = create_base_canonical_card(seed=211)
+    cv2.circle(c_11, (1000, 400), 2, (38, 38, 38), -1)  # 4 px = 0.20 mm < 0.35 mm
+    c_11_v0 = c_11.copy()
+    apply_glare_spot(c_11_v0, center_xy=(1000, 400), radius_x=100, radius_y=50)
+    c_11_v1 = c_11.copy()
+    apply_glare_spot(c_11_v1, center_xy=(750, 250), radius_x=60, radius_y=30)
+    c_11_v2 = c_11.copy()
+    apply_glare_spot(c_11_v2, center_xy=(1250, 550), radius_x=60, radius_y=30)
+    save_specimen(
+        "specimen_11",
+        render_camera_frame(c_11_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_11_v1, tilt_deg=10.0, exposure_scale=1.0),
+        render_camera_frame(c_11_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": True,
+            "defect_subtype": "micro_dimple",
+            "true_length_mm": 0.22,
+            "gt_bbox_canonical": [998, 398, 6, 6],
+            "note": f"{LABEL_DISCLAIMER} - Honest Active Miss Failure Case: Borderline micro-dimple (0.22 mm < min 0.35 mm cutoff), demonstrating physical resolution boundary.",
+        },
+    )
+
+    # Specimen 12: Clean foil with glare in view 0 and clean view 1 (rotated 90 deg portrait)
+    c_12 = create_base_canonical_card(seed=212)
+    c_12_v0 = c_12.copy()
+    apply_glare_spot(c_12_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
+    c_12_v1 = c_12.copy()
+    apply_glare_spot(c_12_v1, center_xy=(750, 250), radius_x=60, radius_y=30)
+    c_12_v2 = c_12.copy()
+    apply_glare_spot(c_12_v2, center_xy=(1250, 550), radius_x=60, radius_y=30)
+    save_specimen(
+        "specimen_12",
+        render_camera_frame(c_12_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_12_v1, tilt_deg=0.0, exposure_scale=1.0, rotate_90=True),
+        render_camera_frame(c_12_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": False,
+            "defect_subtype": None,
+            "true_length_mm": None,
+            "gt_bbox_canonical": None,
+            "note": f"{LABEL_DISCLAIMER} - Clean foil; view_1 rotated 90 deg portrait to verify rotation invariance in held-out suite.",
+        },
+    )
+
+    # Specimen 13: Clean foil where view 1 has corrupted/missing Marker 0 (MarkerNotFoundError) and view 2 is valid
+    c_13 = create_base_canonical_card(seed=213)
+    c_13_v0 = c_13.copy()
+    apply_glare_spot(c_13_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
+    c_13_v1 = c_13.copy()  # Will corrupt Marker 0
+    c_13_v2 = c_13.copy()
+    apply_glare_spot(c_13_v2, center_xy=(750, 250), radius_x=60, radius_y=30)
+    save_specimen(
+        "specimen_13",
+        render_camera_frame(c_13_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_13_v1, tilt_deg=10.0, exposure_scale=1.0, corrupt_marker0=True),
+        render_camera_frame(c_13_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": False,
+            "defect_subtype": None,
+            "true_length_mm": None,
+            "gt_bbox_canonical": None,
+            "note": f"{LABEL_DISCLAIMER} - Clean foil; view_1 has corrupted Marker 0 (MarkerNotFoundError) to test M-03 graceful candidate skip.",
+        },
+    )
+
+    # Specimen 14: Clean foil with a shallow foil handling wrinkle (solidity < 0.30) under glare
+    c_14 = create_base_canonical_card(seed=214)
+    # Draw shallow, winding wrinkle with low solidity: long thin curved line with branches
+    pts = np.array(
+        [[960, 390], [975, 410], [990, 395], [1005, 415], [1020, 390], [1040, 405]], np.int32
+    )
+    cv2.polylines(c_14, [pts], isClosed=False, color=(110, 110, 110), thickness=2)
+    c_14_v0 = c_14.copy()
+    apply_glare_spot(c_14_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
+    c_14_v1 = c_14.copy()
+    apply_glare_spot(c_14_v1, center_xy=(750, 250), radius_x=60, radius_y=30)
+    c_14_v2 = c_14.copy()
+    apply_glare_spot(c_14_v2, center_xy=(1250, 550), radius_x=60, radius_y=30)
+    save_specimen(
+        "specimen_14",
+        render_camera_frame(c_14_v0, tilt_deg=0.0, exposure_scale=1.0),
+        render_camera_frame(c_14_v1, tilt_deg=10.0, exposure_scale=1.0),
+        render_camera_frame(c_14_v2, tilt_deg=-10.0, exposure_scale=1.0),
+        {
+            "split": "held_out",
+            "has_defect": False,
+            "defect_subtype": None,
+            "true_length_mm": None,
+            "gt_bbox_canonical": None,
+            "note": f"{LABEL_DISCLAIMER} - Clean foil with shallow handling wrinkle (solidity < 0.30) under glare; tests clean false reject avoidance.",
+        },
+    )
+
+    # Write ground_truth.json
+    gt_path = "assets/specimens/ground_truth.json"
+    with open(gt_path, "w", encoding="utf-8") as f:
+        json.dump(gt_entries, f, indent=2)
+
+    print(f"[OK] Generated assets/specimens/ (14 specimens x 3 views) with {gt_path}")
+
+
+def main() -> None:
+    print("============================================================")
+    print("SpecuLab-MCP Optical Testbed Generator")
+    print(f"Notice: {LABEL_DISCLAIMER}")
+    print("============================================================")
+    generate_pilot_dataset()
+    generate_specimen_dataset()
+    print("Testbed generation complete.")
+
+
+if __name__ == "__main__":
+    main()

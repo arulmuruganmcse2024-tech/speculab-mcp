@@ -52,6 +52,10 @@ def compute_sha256(filepath: str) -> str:
 def main():
     st.title("🔬 SpecuLab-MCP: Autonomous Active Vision Metrology")
     st.caption("Arm Graviton / AWS Bedrock / FastMCP Multi-View Specular Glare Elimination")
+    st.info(
+        "ℹ️ **Dataset Notice**: Automated Procedural Optical Testbed "
+        "(Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo)"
+    )
 
     engine, agent = get_stateless_system()
     runtime_meta = get_opencv_runtime_metadata()

@@ -1,0 +1,50 @@
+{
+  "metadata": {
+    "resize_ms": 1.839,
+    "cvt_color_ms": 0.44,
+    "gaussian_blur_ms": 0.441,
+    "aruco_detect_ms": 8.286,
+    "warp_perspective_ms": 4.148,
+    "rectification_mode": "DUAL_MARKER_8PT",
+    "native_px_per_mm": 18.76,
+    "native_mm_per_px": 0.0533,
+    "tilt_quality_ratio": 0.96,
+    "approx_roll_deg": null,
+    "approx_pitch_deg": null,
+    "orig_dimensions": [
+      2400,
+      1200
+    ]
+  },
+  "candidate_count": 2,
+  "candidates": [
+    {
+      "area_px": 248.0,
+      "solidity": 0.982,
+      "peak_contrast": 121.0,
+      "length_mm": 0.9,
+      "width_mm": 0.9,
+      "circularity": 0.907,
+      "bbox_canonical": [
+        942,
+        392,
+        18,
+        18
+      ]
+    },
+    {
+      "area_px": 1166.5,
+      "solidity": 0.936,
+      "peak_contrast": 57.0,
+      "length_mm": 3.55,
+      "width_mm": 1.0,
+      "circularity": 0.5,
+      "bbox_canonical": [
+        715,
+        212,
+        71,
+        20
+      ]
+    }
+  ]
+}

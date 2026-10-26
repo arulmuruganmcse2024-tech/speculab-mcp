@@ -9,13 +9,26 @@ tmp_smoke_test/
 *.mp4
 .DS_Store
 
-# Logs and runtime artifacts
+# Logs and ephemeral runtime artifacts
 logs/*.jsonl
-logs/*.json
-logs/*.txt
 logs/global_llm_quota.json
-logs/cached_bedrock_runs/
-!logs/.gitkeep
 
-# Specimen ground truth and images (keep .gitkeep)
+# Keep empirical verification reports and cached traces
+!logs/.gitkeep
+!logs/cool_verification.json
+!logs/cool_verification.txt
+!logs/pilot_physics_report.json
+!logs/pilot_zones_annotated.jpg
+!logs/tuning_contours_dump.json
+!logs/cached_bedrock_runs/
+!logs/cached_bedrock_runs/*.json
+
+# Keep printable test card, pilot assets, and pre-seeded optical testbed
+!assets/printable_test_card.png
+!assets/pilot/
+!assets/pilot/*
+!assets/specimens/
 !assets/specimens/.gitkeep
+!assets/specimens/ground_truth.json
+!assets/specimens/specimen_*
+!assets/specimens/specimen_*/*

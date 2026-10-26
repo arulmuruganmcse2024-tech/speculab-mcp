@@ -1,0 +1,21 @@
+{
+  "instance_type": "LOCAL_DEV",
+  "ami_id": "LOCAL_DEV",
+  "architecture": "AMD64",
+  "cool_venv_path": "C:\\Users\\arulm\\OneDrive\\Documents\\Hackathon\\speculab-mcp\\venv",
+  "cv2_version": "5.0.0",
+  "cv2_file": "C:\\Users\\arulm\\OneDrive\\Documents\\Hackathon\\speculab-mcp\\venv\\Lib\\site-packages\\cv2\\__init__.py",
+  "numpy_version": "2.5.4",
+  "kleidicv_simd_flags": [
+    "CPU/HW features:",
+    "Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX",
+    "AVX (17 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX",
+    "FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16",
+    "AVX2 (49 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3",
+    "AVX512_SKX (9 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX",
+    "SIMD Support Request:      YES",
+    "SIMD Support:              YES",
+    "SIMD Support Request:      YES",
+    "SIMD Support:              YES (Intel SSE)"
+  ]
+}

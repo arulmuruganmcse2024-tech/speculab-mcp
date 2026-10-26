@@ -71,6 +71,49 @@ def main() -> int:
     print("=" * 60)
     print("All required core components verified.")
     print("=" * 60)
+
+    import argparse
+    import json
+    import platform
+
+    parser = argparse.ArgumentParser(description="Check environment")
+    parser.add_argument("--write-verification-json", action="store_true", help="Write logs/cool_verification.json")
+    args, _ = parser.parse_known_args()
+
+    if args.write_verification_json:
+        os.makedirs("logs", exist_ok=True)
+        arch = platform.machine()
+        cv_ver = cv2.__version__
+        cv_file = getattr(cv2, "__file__", "BUILTIN")
+        build_info = cv2.getBuildInformation()
+        kleidi_flags = []
+        for line in build_info.splitlines():
+            l_clean = line.strip()
+            if any(k in l_clean.lower() for k in ["kleidicv", "neon", "simd", "avx", "cpu", "dispatch"]):
+                kleidi_flags.append(l_clean)
+
+        cool_path = "/opt/cool" if os.path.exists("/opt/cool") else sys.prefix
+        rep = {
+            "instance_type": "LOCAL_DEV",
+            "ami_id": "LOCAL_DEV",
+            "architecture": arch,
+            "cool_venv_path": cool_path,
+            "cv2_version": cv_ver,
+            "cv2_file": cv_file,
+            "numpy_version": np.__version__,
+            "kleidicv_simd_flags": kleidi_flags[:10],
+        }
+        with open("logs/cool_verification.json", "w", encoding="utf-8") as f:
+            json.dump(rep, f, indent=2)
+        with open("logs/cool_verification.txt", "w", encoding="utf-8") as tf:
+            tf.write(f"Instance Type: {rep['instance_type']}\n")
+            tf.write(f"AMI ID: {rep['ami_id']}\n")
+            tf.write(f"Architecture: {rep['architecture']}\n")
+            tf.write(f"OpenCV: {rep['cv2_version']} ({rep['cv2_file']})\n")
+            tf.write(f"NumPy: {rep['numpy_version']}\n")
+            tf.write("Build flags:\n" + "\n".join(kleidi_flags[:10]) + "\n")
+        print("[OK] Written logs/cool_verification.json and logs/cool_verification.txt")
+
     return 0
 
 if __name__ == "__main__":

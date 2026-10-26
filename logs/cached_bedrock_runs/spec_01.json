@@ -1,0 +1,49 @@
+{
+  "specimen_id": "spec_01",
+  "active_result": {
+    "status": "HEALED_AND_INSPECTED",
+    "verdict": "REJECT",
+    "max_defect_length_mm": 1.5,
+    "defects": [
+      {
+        "length_mm": 1.5,
+        "width_mm": 1.5,
+        "area_px": 719.0,
+        "solidity": 0.989,
+        "peak_contrast": 130.0,
+        "circularity": 0.911,
+        "bbox_canonical": [
+          986,
+          386,
+          30,
+          30
+        ]
+      }
+    ],
+    "requires_human_approval": true,
+    "residual_glare_pct": 0.0,
+    "view_attempts_used": 0,
+    "decision_note": "Foil glare below gate on Pass 1; no view fusion required."
+  },
+  "llm_telemetry": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "estimated_token_cost_usd_unverified": 0.0,
+    "cost_notice": "[ESTIMATE ONLY - VERIFY ON AWS BEDROCK PRICING PAGE]",
+    "tool_calls_count": 0,
+    "latency_ms": 0.0,
+    "fallback_to_deterministic": false,
+    "model_id": "us.amazon.nova-lite-v1:0"
+  },
+  "trace": [
+    {
+      "timeline_phase": "Pass 1 Glare Gate & Trigger Assessment",
+      "glare_pct": 0.0,
+      "glare_gate_pct": 2.0,
+      "glare_disagreement": false,
+      "trigger_active": false,
+      "passive_unmasked_verdict": "REJECT",
+      "passive_masked_verdict": "REJECT"
+    }
+  ]
+}

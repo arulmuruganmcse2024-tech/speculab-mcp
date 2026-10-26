@@ -206,7 +206,7 @@ def evaluate_method_on_split(
                 defects = res["defects"]
                 status = "HEALED_AND_INSPECTED"
             except (MarkerNotFoundError, ValueError, Exception):
-                verdict = "PASS"
+                verdict = "ESCALATE_UNRESOLVED_OCCLUSION"
                 defects = []
                 status = "UNRESOLVED_OCCLUSION"
         else:
@@ -259,7 +259,7 @@ def evaluate_method_on_split(
 
         # Check classification outcome
         is_reject = verdict == "REJECT"
-        is_escalated = status == "UNRESOLVED_OCCLUSION"
+        is_escalated = bool(status == "UNRESOLVED_OCCLUSION" or str(verdict).startswith("ESCALATE"))
 
         # Check bbox localization if gt_bbox provided
         if is_reject and has_defect and gt_bbox is not None:

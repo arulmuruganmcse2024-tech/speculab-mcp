@@ -1,0 +1,104 @@
+{
+  "view0_path": "assets/pilot/pilot_view_0.jpg",
+  "view1_path": "assets/pilot/pilot_view_1.jpg",
+  "view0_glare_pct": 9.237,
+  "view1_glare_pct": 4.619,
+  "residual_glare_pct": 0.0,
+  "zone_metrics_view0": {
+    "zone_a_through_hole": {
+      "window_bbox": [
+        160,
+        160,
+        80,
+        80
+      ],
+      "min_gray": 153,
+      "max_gray": 223,
+      "local_std": 14.91,
+      "glare_coverage_pct": 2.28,
+      "blackhat_peak_response": 7.0
+    },
+    "zone_b_blind_pin_dent": {
+      "window_bbox": [
+        360,
+        160,
+        80,
+        80
+      ],
+      "min_gray": 225,
+      "max_gray": 252,
+      "local_std": 2.78,
+      "glare_coverage_pct": 100.0,
+      "blackhat_peak_response": 1.0
+    },
+    "zone_c_surface_scratch": {
+      "window_bbox": [
+        560,
+        160,
+        80,
+        80
+      ],
+      "min_gray": 149,
+      "max_gray": 222,
+      "local_std": 15.86,
+      "glare_coverage_pct": 3.44,
+      "blackhat_peak_response": 9.0
+    }
+  },
+  "zone_metrics_view1": {
+    "zone_a_through_hole": {
+      "window_bbox": [
+        160,
+        160,
+        80,
+        80
+      ],
+      "min_gray": 26,
+      "max_gray": 184,
+      "local_std": 36.38,
+      "glare_coverage_pct": 0.0,
+      "blackhat_peak_response": 151.0
+    },
+    "zone_b_blind_pin_dent": {
+      "window_bbox": [
+        360,
+        160,
+        80,
+        80
+      ],
+      "min_gray": 32,
+      "max_gray": 184,
+      "local_std": 26.12,
+      "glare_coverage_pct": 0.0,
+      "blackhat_peak_response": 146.0
+    },
+    "zone_c_surface_scratch": {
+      "window_bbox": [
+        560,
+        160,
+        80,
+        80
+      ],
+      "min_gray": 34,
+      "max_gray": 184,
+      "local_std": 20.89,
+      "glare_coverage_pct": 0.0,
+      "blackhat_peak_response": 142.0
+    }
+  },
+  "peak_blackhat_responses": {
+    "zone_a_through_hole": 151.0,
+    "zone_b_blind_pin_dent": 146.0,
+    "zone_c_surface_scratch": 142.0
+  },
+  "selected_defect_subtypes": [
+    "through_hole",
+    "blind_pin_dent",
+    "surface_scratch"
+  ],
+  "detector_outcomes": {
+    "passive_unmasked": "PASS",
+    "passive_glare_masked": "PASS",
+    "active_multi_view": "REJECT"
+  }
+}

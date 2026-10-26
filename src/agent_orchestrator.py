@@ -453,8 +453,21 @@ class BedrockMCPAgent:
 
             if rect_alt is None:
                 # Load on demand if not in cache
-                img_alt = load_image_exif_safe(candidate_path)
-                rect_alt, _ = self.engine.rectify_to_canonical_plane(img_alt, optional_flags=opt)
+                try:
+                    img_alt = load_image_exif_safe(candidate_path)
+                    if img_alt is None:
+                        raise ValueError(f"Could not load image at {candidate_path}")
+                    rect_alt, _ = self.engine.rectify_to_canonical_plane(img_alt, optional_flags=opt)
+                except (MarkerNotFoundError, ValueError, Exception) as e:
+                    state["view_attempts"] += 1
+                    return {
+                        "error": f"Candidate view {candidate_path} unusable: {e}",
+                        "view_attempts_used": state["view_attempts"],
+                        "max_view_attempts": self.MAX_VIEW_ATTEMPTS,
+                        "residual_glare_pct": state["residual_glare_pct"],
+                        "glare_cleared_below_gate": state["residual_glare_pct"] <= gate,
+                        "recommended_next_step": "finalize_inspection_or_escalate",
+                    }
 
             # Snapshot state before fusion
             state["prev_snapshot"] = {

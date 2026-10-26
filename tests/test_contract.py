@@ -429,3 +429,36 @@ def test_doc_placeholders_match_render_script():
             assert (
                 token in all_registered
             ), f"Unregistered placeholder '{token}' found in {doc}. Must match render_report_tables.py!"
+
+
+def test_zero_remaining_todos_and_preloaded_dataset_ready():
+    """Assert zero remaining TODO_* in documentation and that preloaded dataset + empirical reports exist."""
+    from evaluate import validate_ground_truth
+
+    docs = ["README.md", "TECHNICAL_REPORT.md", "VIDEO_SCRIPT.md", "DEVPOST_SUBMISSION.md"]
+    for doc in docs:
+        assert os.path.exists(doc), f"Document {doc} does not exist"
+        with open(doc, "r", encoding="utf-8") as f:
+            content = f.read()
+        todos = re.findall(r"TODO_[A-Z0-9_]+", content)
+        assert len(todos) == 0, f"Found remaining TODO placeholders in {doc}: {todos}"
+
+    assert os.path.exists("evaluation_report.json"), "evaluation_report.json missing"
+    with open("evaluation_report.json", "r", encoding="utf-8") as f:
+        eval_data = json.load(f)
+    assert isinstance(eval_data, dict), "evaluation_report.json not valid JSON object"
+    assert "held_out_methods" in eval_data, "evaluation_report.json missing held_out_methods key"
+
+    assert os.path.exists("benchmark_comparison.json"), "benchmark_comparison.json missing"
+    with open("benchmark_comparison.json", "r", encoding="utf-8") as f:
+        bench_data = json.load(f)
+    assert isinstance(bench_data, dict), "benchmark_comparison.json not valid JSON object"
+    assert "runs" in bench_data, "benchmark_comparison.json missing runs key"
+
+    gt_path = "assets/specimens/ground_truth.json"
+    assert os.path.exists(gt_path), "assets/specimens/ground_truth.json missing"
+    with open(gt_path, "r", encoding="utf-8") as f:
+        gt_data = json.load(f)
+    assert len(gt_data) == 14, f"Expected 14 specimens in ground_truth.json, found {len(gt_data)}"
+    validate_ground_truth(gt_data)
+

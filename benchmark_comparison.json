@@ -1,0 +1,350 @@
+{
+  "compared_runs": [
+    "opencv5_default_opt",
+    "opencv5_unoptimized_baseline"
+  ],
+  "input_files": [
+    "benchmark_opencv5_default_opt.json",
+    "benchmark_opencv5_unoptimized_baseline.json"
+  ],
+  "runs": [
+    {
+      "label": "opencv5_default_opt",
+      "timestamp_iso": "2026-10-26T18:19:53Z",
+      "opencv_runtime": {
+        "cv2_version": "5.0.0",
+        "cv2_major": 5,
+        "threads_configured": 4,
+        "optimizations_enabled": true,
+        "simd_metadata": [
+          "CPU/HW features:",
+          "Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX",
+          "AVX (17 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX",
+          "FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16",
+          "AVX2 (49 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3",
+          "AVX512_SKX (9 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX",
+          "SIMD Support Request:      YES",
+          "SIMD Support:              YES",
+          "SIMD Support Request:      YES",
+          "SIMD Support:              YES (Intel SSE)"
+        ],
+        "build_information": "\nGeneral configuration for OpenCV 5.0.0 =====================================\n  Version control:               5.0.0\n\n  Platform:\n    Timestamp:                   2026-07-01T09:07:40Z\n    Host:                        Windows 10.0.20348 AMD64\n    CMake:                       4.3.2\n    CMake generator:             Visual Studio 17 2022\n    CMake build tool:            C:/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe\n    MSVC:                        1944\n    Configuration:               Debug Release\n    Algorithm Hint:              ALGO_HINT_ACCURATE\n\n  CPU/HW features:\n    Baseline:                    SSE SSE2 SSE3\n      requested:                 SSE3\n    Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX\n      SSE4_1 (18 files):         + SSSE3 SSE4_1\n      SSE4_2 (1 files):          + SSSE3 SSE4_1 POPCNT SSE4_2\n      AVX (17 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX\n      FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16\n      AVX2 (49 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3\n      AVX512_SKX (9 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX\n\n  C/C++:\n    Built as dynamic libs?:      NO\n    C++ standard:                17\n    C++ Compiler:                C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe  (ver 19.44.35228.0)\n    C++ flags (Release):         /DWIN32 /D_WINDOWS /W4 /GR  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /EHa /wd4127 /wd4251 /wd4324 /wd4275 /wd4512 /wd4589 /wd4819 /MP  /O2 /Ob2 /DNDEBUG \n    C++ flags (Debug):           /DWIN32 /D_WINDOWS /W4 /GR  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /EHa /wd4127 /wd4251 /wd4324 /wd4275 /wd4512 /wd4589 /wd4819 /MP  /Zi /Ob0 /Od /RTC1 \n    C Compiler:                  C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe\n    C flags (Release):           /DWIN32 /D_WINDOWS /W3  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /MP   /O2 /Ob2 /DNDEBUG \n    C flags (Debug):             /DWIN32 /D_WINDOWS /W3  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /MP /Zi /Ob0 /Od /RTC1 \n    Linker flags (Release):      /machine:x64  /NODEFAULTLIB:atlthunk.lib /INCREMENTAL:NO  /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:libcpmtd.lib /NODEFAULTLIB:msvcrtd.lib\n    Linker flags (Debug):        /machine:x64  /NODEFAULTLIB:atlthunk.lib /debug /INCREMENTAL  /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcpmt.lib /NODEFAULTLIB:msvcrt.lib\n    ccache:                      NO\n    Precompiled headers:         YES\n    Extra dependencies:          comctl32 gdi32 ole32 setupapi ws2_32\n    3rdparty dependencies:       ittnotify libprotobuf libjpeg-turbo libwebp libpng libtiff libopenjp2 zlib libclapack ipphal ippiw ippicv\n\n  OpenCV modules:\n    To be built:                 calib core dnn features flann geometry highgui imgcodecs imgproc objdetect photo ptcloud python3 stereo stitching video videoio\n    Disabled:                    java world\n    Disabled by dependency:      -\n    Unavailable:                 ts\n    Applications:                -\n    Documentation:               NO\n    Non-free algorithms:         NO\n\n  Windows RT support:            NO\n\n  GUI:                           NONE\n    VTK support:                 NO\n    Built-in Unicode font:       YES\n\n  Media I/O: \n    ZLib:                        build (ver 1.3.2)\n    JPEG:                        build-libjpeg-turbo (ver 3.1.2-70)\n      SIMD Support Request:      YES\n      SIMD Support:              YES\n    WEBP:                        build (ver decoder: 0x0210, encoder: 0x0210, demux: 0x0107)\n    AVIF:                        NO\n    PNG:                         build (ver 1.6.57)\n      SIMD Support Request:      YES\n      SIMD Support:              YES (Intel SSE)\n      Metadata Support:          EXIF XMP ICC cICP\n    TIFF:                        build (ver 42 - 4.7.1)\n    JPEG 2000:                   build (ver 2.5.3)\n    OpenEXR:                     NO\n    GIF:                         YES\n    HDR:                         YES\n    SUNRASTER:                   YES\n    PXM:                         YES\n    PFM:                         YES\n\n  Video I/O:\n    FFMPEG:                      YES (prebuilt binaries)\n      avcodec:                   YES (61.19.100)\n      avformat:                  YES (61.7.100)\n      avutil:                    YES (59.39.100)\n      swscale:                   YES (8.3.100)\n      avdevice:                  NO\n    GStreamer:                   NO\n    DirectShow:                  YES\n    Orbbec:                      NO\n\n  Parallel framework:            Concurrency\n\n  Trace:                         YES (with Intel ITT(3.25.4))\n\n  Other third-party libraries:\n    Intel IPP:                   2026.0.0 [2026.0.0]\n           at:                   D:/a/opencv-python/opencv-python/_skbuild/win-amd64-3.9/cmake-build/3rdparty/ippicv/ippicv_win/icv\n    Intel IPP IW:                sources (2026.0.0)\n              at:                D:/a/opencv-python/opencv-python/_skbuild/win-amd64-3.9/cmake-build/3rdparty/ippicv/ippicv_win/iw\n    Lapack:                      YES (Built-In libclapack)\n    DNN MLAS:                    NO (no ASM compiler available for AMD64)\n    Eigen:                       NO\n    Custom HAL:                  YES (ipp (ver 0.0.1))\n    Protobuf:                    build (3.19.1)\n    Flatbuffers:                 builtin/3rdparty (25.9.23)\n\n  OpenCL:                        YES (NVD3D11)\n    Include path:                D:/a/opencv-python/opencv-python/opencv/3rdparty/include/opencl/1.2\n    Link libraries:              Dynamic load\n\n  ONNX Runtime:                  NO\n\n  Python 3:\n    Interpreter:                 C:/hostedtoolcache/windows/Python/3.9.13/x64/python.exe (ver 3.9.13)\n    Libraries:                   C:/hostedtoolcache/windows/Python/3.9.13/x64/libs/python39.lib (ver 3.9.13)\n    Limited API:                 YES (ver 0x03060000)\n    numpy:                       C:/hostedtoolcache/windows/Python/3.9.13/x64/lib/site-packages/numpy/_core/include (ver 2.0.2)\n    install path:                python/cv2/python-3\n\n  Python (for build):            C:\\hostedtoolcache\\windows\\Python\\3.9.13\\x64\\python.exe\n\n  Java:                          \n    ant:                         NO\n    Java:                        YES (ver 1.8.0.492)\n    JNI:                         C:/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/8.0.492-9/x64/include C:/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/8.0.492-9/x64/include/win32 C:/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/8.0.492-9/x64/include\n    Java wrappers:               NO\n    Java tests:                  NO\n\n  Install to:                    D:/a/opencv-python/opencv-python/_skbuild/win-amd64-3.9/cmake-install\n-----------------------------------------------------------------\n\n"
+      },
+      "cost_analysis": {
+        "pricing_status": "UNPRICED_EXCLUDED_FROM_COST",
+        "hourly_ec2_cost_usd": null,
+        "cost_per_1m_inspections_1thread_usd": null,
+        "cost_per_1m_inspections_nthread_usd": null
+      },
+      "profile_1thread": {
+        "threads": 1,
+        "warmup_iterations": 5,
+        "timed_iterations": 30,
+        "throughput_fps": 3.51,
+        "peak_rss_mb": 158.55,
+        "stages": {
+          "resize_ms": {
+            "mean_ms": 2.867,
+            "std_ms": 0.81,
+            "p50_ms": 2.815,
+            "p95_ms": 4.383
+          },
+          "cvt_color_ms": {
+            "mean_ms": 0.49,
+            "std_ms": 0.173,
+            "p50_ms": 0.448,
+            "p95_ms": 0.852
+          },
+          "gaussian_blur_ms": {
+            "mean_ms": 0.341,
+            "std_ms": 0.135,
+            "p50_ms": 0.313,
+            "p95_ms": 0.62
+          },
+          "aruco_detect_ms": {
+            "mean_ms": 24.487,
+            "std_ms": 5.125,
+            "p50_ms": 22.944,
+            "p95_ms": 35.711
+          },
+          "warp_perspective_ms": {
+            "mean_ms": 22.801,
+            "std_ms": 2.762,
+            "p50_ms": 22.247,
+            "p95_ms": 27.488
+          },
+          "glare_mask_and_entropy_ms": {
+            "mean_ms": 18.973,
+            "std_ms": 2.911,
+            "p50_ms": 18.213,
+            "p95_ms": 23.943
+          },
+          "orb_extract_ms": {
+            "mean_ms": 19.484,
+            "std_ms": 4.809,
+            "p50_ms": 17.581,
+            "p95_ms": 31.008
+          },
+          "usac_magsac_ms": {
+            "mean_ms": 165.564,
+            "std_ms": 34.198,
+            "p50_ms": 148.549,
+            "p95_ms": 247.399
+          },
+          "detection_morphology_ms": {
+            "mean_ms": 28.303,
+            "std_ms": 7.824,
+            "p50_ms": 25.417,
+            "p95_ms": 47.401
+          },
+          "total_pipeline_ms": {
+            "mean_ms": 283.319,
+            "std_ms": 45.401,
+            "p50_ms": 262.787,
+            "p95_ms": 376.331
+          }
+        }
+      },
+      "profile_nthread": {
+        "threads": 4,
+        "warmup_iterations": 5,
+        "timed_iterations": 30,
+        "throughput_fps": 4.88,
+        "peak_rss_mb": 166.18,
+        "stages": {
+          "resize_ms": {
+            "mean_ms": 1.546,
+            "std_ms": 0.585,
+            "p50_ms": 1.373,
+            "p95_ms": 2.826
+          },
+          "cvt_color_ms": {
+            "mean_ms": 0.325,
+            "std_ms": 0.185,
+            "p50_ms": 0.242,
+            "p95_ms": 0.7
+          },
+          "gaussian_blur_ms": {
+            "mean_ms": 0.233,
+            "std_ms": 0.081,
+            "p50_ms": 0.21,
+            "p95_ms": 0.383
+          },
+          "aruco_detect_ms": {
+            "mean_ms": 14.255,
+            "std_ms": 3.35,
+            "p50_ms": 13.003,
+            "p95_ms": 20.794
+          },
+          "warp_perspective_ms": {
+            "mean_ms": 12.844,
+            "std_ms": 1.477,
+            "p50_ms": 12.559,
+            "p95_ms": 15.515
+          },
+          "glare_mask_and_entropy_ms": {
+            "mean_ms": 16.049,
+            "std_ms": 1.362,
+            "p50_ms": 15.768,
+            "p95_ms": 18.421
+          },
+          "orb_extract_ms": {
+            "mean_ms": 16.084,
+            "std_ms": 1.644,
+            "p50_ms": 15.662,
+            "p95_ms": 18.54
+          },
+          "usac_magsac_ms": {
+            "mean_ms": 116.259,
+            "std_ms": 6.495,
+            "p50_ms": 114.878,
+            "p95_ms": 128.93
+          },
+          "detection_morphology_ms": {
+            "mean_ms": 25.615,
+            "std_ms": 4.783,
+            "p50_ms": 23.329,
+            "p95_ms": 33.238
+          },
+          "total_pipeline_ms": {
+            "mean_ms": 203.218,
+            "std_ms": 12.338,
+            "p50_ms": 200.545,
+            "p95_ms": 229.158
+          }
+        }
+      }
+    },
+    {
+      "label": "opencv5_unoptimized_baseline",
+      "timestamp_iso": "2026-10-26T18:21:24Z",
+      "opencv_runtime": {
+        "cv2_version": "5.0.0",
+        "cv2_major": 5,
+        "threads_configured": 4,
+        "optimizations_enabled": true,
+        "simd_metadata": [
+          "CPU/HW features:",
+          "Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX",
+          "AVX (17 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX",
+          "FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16",
+          "AVX2 (49 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3",
+          "AVX512_SKX (9 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX",
+          "SIMD Support Request:      YES",
+          "SIMD Support:              YES",
+          "SIMD Support Request:      YES",
+          "SIMD Support:              YES (Intel SSE)"
+        ],
+        "build_information": "\nGeneral configuration for OpenCV 5.0.0 =====================================\n  Version control:               5.0.0\n\n  Platform:\n    Timestamp:                   2026-07-01T09:07:40Z\n    Host:                        Windows 10.0.20348 AMD64\n    CMake:                       4.3.2\n    CMake generator:             Visual Studio 17 2022\n    CMake build tool:            C:/Program Files/Microsoft Visual Studio/2022/Enterprise/MSBuild/Current/Bin/amd64/MSBuild.exe\n    MSVC:                        1944\n    Configuration:               Debug Release\n    Algorithm Hint:              ALGO_HINT_ACCURATE\n\n  CPU/HW features:\n    Baseline:                    SSE SSE2 SSE3\n      requested:                 SSE3\n    Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX\n      SSE4_1 (18 files):         + SSSE3 SSE4_1\n      SSE4_2 (1 files):          + SSSE3 SSE4_1 POPCNT SSE4_2\n      AVX (17 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX\n      FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16\n      AVX2 (49 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3\n      AVX512_SKX (9 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX\n\n  C/C++:\n    Built as dynamic libs?:      NO\n    C++ standard:                17\n    C++ Compiler:                C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe  (ver 19.44.35228.0)\n    C++ flags (Release):         /DWIN32 /D_WINDOWS /W4 /GR  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /EHa /wd4127 /wd4251 /wd4324 /wd4275 /wd4512 /wd4589 /wd4819 /MP  /O2 /Ob2 /DNDEBUG \n    C++ flags (Debug):           /DWIN32 /D_WINDOWS /W4 /GR  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /EHa /wd4127 /wd4251 /wd4324 /wd4275 /wd4512 /wd4589 /wd4819 /MP  /Zi /Ob0 /Od /RTC1 \n    C Compiler:                  C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe\n    C flags (Release):           /DWIN32 /D_WINDOWS /W3  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /MP   /O2 /Ob2 /DNDEBUG \n    C flags (Debug):             /DWIN32 /D_WINDOWS /W3  /D _CRT_SECURE_NO_DEPRECATE /D _CRT_NONSTDC_NO_DEPRECATE /D _SCL_SECURE_NO_WARNINGS /Gy /bigobj /Oi  /fp:precise    /MP /Zi /Ob0 /Od /RTC1 \n    Linker flags (Release):      /machine:x64  /NODEFAULTLIB:atlthunk.lib /INCREMENTAL:NO  /NODEFAULTLIB:libcmtd.lib /NODEFAULTLIB:libcpmtd.lib /NODEFAULTLIB:msvcrtd.lib\n    Linker flags (Debug):        /machine:x64  /NODEFAULTLIB:atlthunk.lib /debug /INCREMENTAL  /NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:libcpmt.lib /NODEFAULTLIB:msvcrt.lib\n    ccache:                      NO\n    Precompiled headers:         YES\n    Extra dependencies:          comctl32 gdi32 ole32 setupapi ws2_32\n    3rdparty dependencies:       ittnotify libprotobuf libjpeg-turbo libwebp libpng libtiff libopenjp2 zlib libclapack ipphal ippiw ippicv\n\n  OpenCV modules:\n    To be built:                 calib core dnn features flann geometry highgui imgcodecs imgproc objdetect photo ptcloud python3 stereo stitching video videoio\n    Disabled:                    java world\n    Disabled by dependency:      -\n    Unavailable:                 ts\n    Applications:                -\n    Documentation:               NO\n    Non-free algorithms:         NO\n\n  Windows RT support:            NO\n\n  GUI:                           NONE\n    VTK support:                 NO\n    Built-in Unicode font:       YES\n\n  Media I/O: \n    ZLib:                        build (ver 1.3.2)\n    JPEG:                        build-libjpeg-turbo (ver 3.1.2-70)\n      SIMD Support Request:      YES\n      SIMD Support:              YES\n    WEBP:                        build (ver decoder: 0x0210, encoder: 0x0210, demux: 0x0107)\n    AVIF:                        NO\n    PNG:                         build (ver 1.6.57)\n      SIMD Support Request:      YES\n      SIMD Support:              YES (Intel SSE)\n      Metadata Support:          EXIF XMP ICC cICP\n    TIFF:                        build (ver 42 - 4.7.1)\n    JPEG 2000:                   build (ver 2.5.3)\n    OpenEXR:                     NO\n    GIF:                         YES\n    HDR:                         YES\n    SUNRASTER:                   YES\n    PXM:                         YES\n    PFM:                         YES\n\n  Video I/O:\n    FFMPEG:                      YES (prebuilt binaries)\n      avcodec:                   YES (61.19.100)\n      avformat:                  YES (61.7.100)\n      avutil:                    YES (59.39.100)\n      swscale:                   YES (8.3.100)\n      avdevice:                  NO\n    GStreamer:                   NO\n    DirectShow:                  YES\n    Orbbec:                      NO\n\n  Parallel framework:            Concurrency\n\n  Trace:                         YES (with Intel ITT(3.25.4))\n\n  Other third-party libraries:\n    Intel IPP:                   2026.0.0 [2026.0.0]\n           at:                   D:/a/opencv-python/opencv-python/_skbuild/win-amd64-3.9/cmake-build/3rdparty/ippicv/ippicv_win/icv\n    Intel IPP IW:                sources (2026.0.0)\n              at:                D:/a/opencv-python/opencv-python/_skbuild/win-amd64-3.9/cmake-build/3rdparty/ippicv/ippicv_win/iw\n    Lapack:                      YES (Built-In libclapack)\n    DNN MLAS:                    NO (no ASM compiler available for AMD64)\n    Eigen:                       NO\n    Custom HAL:                  YES (ipp (ver 0.0.1))\n    Protobuf:                    build (3.19.1)\n    Flatbuffers:                 builtin/3rdparty (25.9.23)\n\n  OpenCL:                        YES (NVD3D11)\n    Include path:                D:/a/opencv-python/opencv-python/opencv/3rdparty/include/opencl/1.2\n    Link libraries:              Dynamic load\n\n  ONNX Runtime:                  NO\n\n  Python 3:\n    Interpreter:                 C:/hostedtoolcache/windows/Python/3.9.13/x64/python.exe (ver 3.9.13)\n    Libraries:                   C:/hostedtoolcache/windows/Python/3.9.13/x64/libs/python39.lib (ver 3.9.13)\n    Limited API:                 YES (ver 0x03060000)\n    numpy:                       C:/hostedtoolcache/windows/Python/3.9.13/x64/lib/site-packages/numpy/_core/include (ver 2.0.2)\n    install path:                python/cv2/python-3\n\n  Python (for build):            C:\\hostedtoolcache\\windows\\Python\\3.9.13\\x64\\python.exe\n\n  Java:                          \n    ant:                         NO\n    Java:                        YES (ver 1.8.0.492)\n    JNI:                         C:/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/8.0.492-9/x64/include C:/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/8.0.492-9/x64/include/win32 C:/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/8.0.492-9/x64/include\n    Java wrappers:               NO\n    Java tests:                  NO\n\n  Install to:                    D:/a/opencv-python/opencv-python/_skbuild/win-amd64-3.9/cmake-install\n-----------------------------------------------------------------\n\n"
+      },
+      "cost_analysis": {
+        "pricing_status": "UNPRICED_EXCLUDED_FROM_COST",
+        "hourly_ec2_cost_usd": null,
+        "cost_per_1m_inspections_1thread_usd": null,
+        "cost_per_1m_inspections_nthread_usd": null
+      },
+      "profile_1thread": {
+        "threads": 1,
+        "warmup_iterations": 5,
+        "timed_iterations": 30,
+        "throughput_fps": 0.89,
+        "peak_rss_mb": 117.45,
+        "stages": {
+          "resize_ms": {
+            "mean_ms": 6.935,
+            "std_ms": 4.481,
+            "p50_ms": 6.515,
+            "p95_ms": 8.709
+          },
+          "cvt_color_ms": {
+            "mean_ms": 1.727,
+            "std_ms": 0.584,
+            "p50_ms": 1.723,
+            "p95_ms": 2.71
+          },
+          "gaussian_blur_ms": {
+            "mean_ms": 4.103,
+            "std_ms": 16.916,
+            "p50_ms": 0.986,
+            "p95_ms": 1.476
+          },
+          "aruco_detect_ms": {
+            "mean_ms": 104.04,
+            "std_ms": 100.233,
+            "p50_ms": 84.194,
+            "p95_ms": 294.721
+          },
+          "warp_perspective_ms": {
+            "mean_ms": 101.667,
+            "std_ms": 98.653,
+            "p50_ms": 81.308,
+            "p95_ms": 215.778
+          },
+          "glare_mask_and_entropy_ms": {
+            "mean_ms": 74.223,
+            "std_ms": 78.11,
+            "p50_ms": 56.119,
+            "p95_ms": 225.032
+          },
+          "orb_extract_ms": {
+            "mean_ms": 78.646,
+            "std_ms": 45.868,
+            "p50_ms": 73.091,
+            "p95_ms": 81.55
+          },
+          "usac_magsac_ms": {
+            "mean_ms": 640.762,
+            "std_ms": 406.598,
+            "p50_ms": 557.754,
+            "p95_ms": 947.569
+          },
+          "detection_morphology_ms": {
+            "mean_ms": 105.15,
+            "std_ms": 85.439,
+            "p50_ms": 81.828,
+            "p95_ms": 297.982
+          },
+          "total_pipeline_ms": {
+            "mean_ms": 1117.267,
+            "std_ms": 674.852,
+            "p50_ms": 951.435,
+            "p95_ms": 2278.991
+          }
+        }
+      },
+      "profile_nthread": {
+        "threads": 4,
+        "warmup_iterations": 5,
+        "timed_iterations": 30,
+        "throughput_fps": 1.91,
+        "peak_rss_mb": 121.84,
+        "stages": {
+          "resize_ms": {
+            "mean_ms": 2.378,
+            "std_ms": 1.952,
+            "p50_ms": 1.636,
+            "p95_ms": 5.234
+          },
+          "cvt_color_ms": {
+            "mean_ms": 0.617,
+            "std_ms": 0.395,
+            "p50_ms": 0.429,
+            "p95_ms": 1.382
+          },
+          "gaussian_blur_ms": {
+            "mean_ms": 0.453,
+            "std_ms": 0.451,
+            "p50_ms": 0.301,
+            "p95_ms": 0.755
+          },
+          "aruco_detect_ms": {
+            "mean_ms": 54.661,
+            "std_ms": 165.986,
+            "p50_ms": 15.599,
+            "p95_ms": 119.102
+          },
+          "warp_perspective_ms": {
+            "mean_ms": 55.972,
+            "std_ms": 166.621,
+            "p50_ms": 13.646,
+            "p95_ms": 157.321
+          },
+          "glare_mask_and_entropy_ms": {
+            "mean_ms": 31.659,
+            "std_ms": 54.548,
+            "p50_ms": 17.185,
+            "p95_ms": 57.021
+          },
+          "orb_extract_ms": {
+            "mean_ms": 52.2,
+            "std_ms": 133.976,
+            "p50_ms": 19.935,
+            "p95_ms": 72.024
+          },
+          "usac_magsac_ms": {
+            "mean_ms": 263.387,
+            "std_ms": 500.662,
+            "p50_ms": 132.2,
+            "p95_ms": 511.45
+          },
+          "detection_morphology_ms": {
+            "mean_ms": 60.442,
+            "std_ms": 153.269,
+            "p50_ms": 25.434,
+            "p95_ms": 78.824
+          },
+          "total_pipeline_ms": {
+            "mean_ms": 521.779,
+            "std_ms": 913.953,
+            "p50_ms": 224.947,
+            "p95_ms": 1825.261
+          }
+        }
+      }
+    }
+  ],
+  "markdown_tables": {
+    "table_1thread": "| Inspection Stage | opencv5_default_opt | opencv5_unoptimized_baseline | Speedup (opencv5_unoptimized_baseline vs opencv5_default_opt) |\n| --- | --- | --- | --- |\n| cv2.resize (1280 proxy) | 2.87 +/- 0.81 ms | 6.93 +/- 4.48 ms | 0.41x (Parity / Within Noise) |\n| cv2.cvtColor (BGR->GRAY) | 0.49 +/- 0.17 ms | 1.73 +/- 0.58 ms | 0.28x (-252.4% slower) |\n| cv2.GaussianBlur (3x3) | 0.34 +/- 0.14 ms | 4.10 +/- 16.92 ms | 0.08x (Parity / Within Noise) |\n| ArUco Detect & Metric | 24.49 +/- 5.12 ms | 104.04 +/- 100.23 ms | 0.24x (Parity / Within Noise) |\n| cv2.warpPerspective (2000x800) | 22.80 +/- 2.76 ms | 101.67 +/- 98.65 ms | 0.22x (Parity / Within Noise) |\n| Hysteresis Glare & Entropy | 18.97 +/- 2.91 ms | 74.22 +/- 78.11 ms | 0.26x (Parity / Within Noise) |\n| ORB Feature Extraction | 19.48 +/- 4.81 ms | 78.65 +/- 45.87 ms | 0.25x (-303.6% slower) |\n| USAC_MAGSAC & Fusion | 165.56 +/- 34.20 ms | 640.76 +/- 406.60 ms | 0.26x (-287.0% slower) |\n| BLACKHAT 61x61 Denoised | 28.30 +/- 7.82 ms | 105.15 +/- 85.44 ms | 0.27x (Parity / Within Noise) |\n| Total Pipeline Inspection | 283.32 +/- 45.40 ms | 1117.27 +/- 674.85 ms | 0.25x (-294.3% slower) |\n| Throughput (FPS) | 3.5 fps | 0.9 fps | 0.25x throughput |\n| Peak RSS Memory (MB) | 158.6 MB | 117.5 MB | -41.1 MB delta |",
+    "table_nthread": "| Inspection Stage | opencv5_default_opt | opencv5_unoptimized_baseline | Speedup (opencv5_unoptimized_baseline vs opencv5_default_opt) |\n| --- | --- | --- | --- |\n| cv2.resize (1280 proxy) | 1.55 +/- 0.58 ms | 2.38 +/- 1.95 ms | 0.65x (Parity / Within Noise) |\n| cv2.cvtColor (BGR->GRAY) | 0.33 +/- 0.18 ms | 0.62 +/- 0.40 ms | 0.53x (Parity / Within Noise) |\n| cv2.GaussianBlur (3x3) | 0.23 +/- 0.08 ms | 0.45 +/- 0.45 ms | 0.51x (Parity / Within Noise) |\n| ArUco Detect & Metric | 14.26 +/- 3.35 ms | 54.66 +/- 165.99 ms | 0.26x (Parity / Within Noise) |\n| cv2.warpPerspective (2000x800) | 12.84 +/- 1.48 ms | 55.97 +/- 166.62 ms | 0.23x (Parity / Within Noise) |\n| Hysteresis Glare & Entropy | 16.05 +/- 1.36 ms | 31.66 +/- 54.55 ms | 0.51x (Parity / Within Noise) |\n| ORB Feature Extraction | 16.08 +/- 1.64 ms | 52.20 +/- 133.98 ms | 0.31x (Parity / Within Noise) |\n| USAC_MAGSAC & Fusion | 116.26 +/- 6.50 ms | 263.39 +/- 500.66 ms | 0.44x (Parity / Within Noise) |\n| BLACKHAT 61x61 Denoised | 25.61 +/- 4.78 ms | 60.44 +/- 153.27 ms | 0.42x (Parity / Within Noise) |\n| Total Pipeline Inspection | 203.22 +/- 12.34 ms | 521.78 +/- 913.95 ms | 0.39x (Parity / Within Noise) |\n| Throughput (FPS) | 4.9 fps | 1.9 fps | 0.39x throughput |\n| Peak RSS Memory (MB) | 166.2 MB | 121.8 MB | -44.3 MB delta |"
+  }
+}
