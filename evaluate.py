@@ -15,8 +15,11 @@ import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+import numpy as np
+
 from src.agent_orchestrator import BedrockMCPAgent
 from src.vision_engine import (
+    MarkerNotFoundError,
     PlanarActiveVisionEngine,
     get_opencv_runtime_metadata,
     load_image_exif_safe,
@@ -185,19 +188,27 @@ def evaluate_method_on_split(
 
         if method_key in ["1A_passive_unmasked", "1B_passive_glare_masked"]:
             v0 = cands[0]
-            img0 = agent.engine.rectify_to_canonical_plane(load_image_exif_safe(v0))[0]
-            if method_key == "1A_passive_unmasked":
-                res = agent.engine.detect_defects(
-                    img0, exclude_mask=None, morph_intensity_thresh=morph_intensity_thresh
-                )
-            else:
-                m0, _, _, _ = agent.engine.compute_glare_mask(img0)
-                res = agent.engine.detect_defects(
-                    img0, exclude_mask=m0, morph_intensity_thresh=morph_intensity_thresh
-                )
-            verdict = res["verdict"]
-            defects = res["defects"]
-            status = "HEALED_AND_INSPECTED"
+            try:
+                raw_img = load_image_exif_safe(v0)
+                if raw_img is None:
+                    raise ValueError(f"Could not load image at {v0}")
+                img0 = agent.engine.rectify_to_canonical_plane(raw_img)[0]
+                if method_key == "1A_passive_unmasked":
+                    res = agent.engine.detect_defects(
+                        img0, exclude_mask=None, morph_intensity_thresh=morph_intensity_thresh
+                    )
+                else:
+                    m0, _, _, _ = agent.engine.compute_glare_mask(img0)
+                    res = agent.engine.detect_defects(
+                        img0, exclude_mask=m0, morph_intensity_thresh=morph_intensity_thresh
+                    )
+                verdict = res["verdict"]
+                defects = res["defects"]
+                status = "HEALED_AND_INSPECTED"
+            except (MarkerNotFoundError, ValueError, Exception):
+                verdict = "PASS"
+                defects = []
+                status = "UNRESOLVED_OCCLUSION"
         else:
             cycle_out = agent.run_inspection_cycle(
                 candidate_paths=cands,
@@ -224,6 +235,27 @@ def evaluate_method_on_split(
                 total_estimated_token_cost_usd_unverified += telem.get(
                     "estimated_token_cost_usd_unverified", 0.0
                 )
+
+                # Track agreement with deterministic baseline and view divergence
+                try:
+                    det_cycle = agent.run_inspection_cycle(
+                        candidate_paths=cands,
+                        policy_mode="active_deterministic",
+                        quota_bucket="cli_evaluation",
+                        specimen_id=sid,
+                        glare_gate_pct=glare_gate_pct,
+                        morph_intensity_thresh=morph_intensity_thresh,
+                    )
+                    det_verdict = det_cycle.get("active_result", {}).get("verdict", "PASS")
+                    if verdict == det_verdict:
+                        llm_vs_deterministic_verdict_agreement_count += 1
+
+                    llm_fused = set(act_res.get("fused_paths", [])) if isinstance(act_res.get("fused_paths"), (list, set)) else set()
+                    det_fused = set(det_cycle.get("active_result", {}).get("fused_paths", [])) if isinstance(det_cycle.get("active_result", {}).get("fused_paths"), (list, set)) else set()
+                    if llm_fused != det_fused:
+                        llm_divergent_view_choice_count += 1
+                except Exception:
+                    pass
 
         # Check classification outcome
         is_reject = verdict == "REJECT"
@@ -270,6 +302,9 @@ def evaluate_method_on_split(
     }
 
     if method_key == "2D_active_bedrock_live":
+        mean_calls = round(float(np.mean(tool_calls_list)), 2) if tool_calls_list else 0.0
+        mean_lat = round(float(np.mean(latencies_list)), 2) if latencies_list else 0.0
+        est_cost = round(total_estimated_token_cost_usd_unverified, 6)
         out.update(
             {
                 "llm_attempted_count": llm_attempted_count,
@@ -277,9 +312,10 @@ def evaluate_method_on_split(
                 "fallback_triggered_count": fallback_triggered_count,
                 "llm_vs_deterministic_verdict_agreement_count": llm_vs_deterministic_verdict_agreement_count,
                 "llm_divergent_view_choice_count": llm_divergent_view_choice_count,
-                "mean_tool_calls": round(float(np.mean(tool_calls_list)), 2) if tool_calls_list else 0.0,
-                "mean_latency_ms": round(float(np.mean(latencies_list)), 2) if latencies_list else 0.0,
-                "estimated_token_cost_usd_unverified": round(total_estimated_token_cost_usd_unverified, 6),
+                "mean_tool_calls": mean_calls,
+                "mean_latency_ms": mean_lat,
+                "estimated_token_cost_usd_unverified": est_cost,
+                "total_estimated_cost_usd": est_cost,
                 "cost_notice": "[ESTIMATE ONLY - VERIFY ON AWS BEDROCK PRICING PAGE]",
             }
         )
@@ -321,38 +357,39 @@ def run_evaluation(
     best_score = -999999
     best_config = (2.0, 30)
 
-    for g in gate_sweep:
-        for th in thresh_sweep:
-            res = evaluate_method_on_split(
-                "2C_active_deterministic",
-                tuning_ids,
-                gt,
-                views_map,
-                agent,
-                glare_gate_pct=g,
-                morph_intensity_thresh=th,
-            )
-            score_tuple = (res["tp_reject"] - res["fp_reject"], res["tp_reject"] + res["def_escalated"])
-            sweep_results.append(
-                {
-                    "glare_gate_pct": g,
-                    "morph_intensity_thresh": th,
-                    "tp_reject": res["tp_reject"],
-                    "fp_reject": res["fp_reject"],
-                    "def_escalated": res["def_escalated"],
-                    "strict_defect_recall": res["strict_defect_recall"],
-                    "safety_capture_rate": res["safety_capture_rate_incl_escalation"],
-                    "clean_false_rejects": res["clean_false_rejects"],
-                }
-            )
+    if tuning_ids:
+        for g in gate_sweep:
+            for th in thresh_sweep:
+                res = evaluate_method_on_split(
+                    "2C_active_deterministic",
+                    tuning_ids,
+                    gt,
+                    views_map,
+                    agent,
+                    glare_gate_pct=g,
+                    morph_intensity_thresh=th,
+                )
+                score_tuple = (res["tp_reject"] - res["fp_reject"], res["tp_reject"] + res["def_escalated"])
+                sweep_results.append(
+                    {
+                        "glare_gate_pct": g,
+                        "morph_intensity_thresh": th,
+                        "tp_reject": res["tp_reject"],
+                        "fp_reject": res["fp_reject"],
+                        "def_escalated": res["def_escalated"],
+                        "strict_defect_recall": res["strict_defect_recall"],
+                        "safety_capture_rate": res["safety_capture_rate_incl_escalation"],
+                        "clean_false_rejects": res["clean_false_rejects"],
+                    }
+                )
 
-            # Tie-breaking in favor of simplest default config (2.0, 30)
-            score_val = score_tuple[0] * 1000 + score_tuple[1]
-            if (g == 2.0 and th == 30) and score_val == best_score:
-                best_config = (g, th)
-            elif score_val > best_score:
-                best_score = score_val
-                best_config = (g, th)
+                # Tie-breaking in favor of simplest default config (2.0, 30)
+                score_val = score_tuple[0] * 1000 + score_tuple[1]
+                if (g == 2.0 and th == 30) and score_val == best_score:
+                    best_config = (g, th)
+                elif score_val > best_score:
+                    best_score = score_val
+                    best_config = (g, th)
 
     locked_gate_pct, locked_morph_thresh = best_config
     print(f"Locked sweep config: glare_gate_pct={locked_gate_pct}, morph_intensity_thresh={locked_morph_thresh}")
@@ -399,6 +436,10 @@ def run_evaluation(
         "tuning_sweep": sweep_results,
         "held_out_methods": held_out_reports,
     }
+
+    out_dir = os.path.dirname(os.path.abspath(output_report))
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
 
     with open(output_report, "w", encoding="utf-8") as f:
         json.dump(full_report, f, indent=2)
