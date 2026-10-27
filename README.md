@@ -1,9 +1,19 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/arulmuruganmcse2024-tech/speculab-mcp/main/assets/gallery/01_hero_wow_moment.png" alt="SpecuLab-MCP Hero Showcase" width="100%" style="border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);" />
+</p>
+
 # SpecuLab-MCP: Autonomous Active Vision Metrology with OpenCV 5.0.0, Cloud-Optimized OpenCV Library (COOL) on AWS Graviton, and Agentic FastMCP
 
-[![Live GitHub Pages Showcase](https://img.shields.io/badge/Live_Showcase-GitHub_Pages-00f0ff?style=for-the-badge&logo=github)](https://arulmuruganmcse2024-tech.github.io/speculab-mcp/)
-[![CI Build & Benchmarks](https://img.shields.io/badge/CI_Matrix-21%2F21_Passing-00f59b?style=for-the-badge&logo=githubactions)](https://github.com/arulmuruganmcse2024-tech/speculab-mcp/actions)
+<p align="center">
+  <a href="https://opencv.org"><img src="https://img.shields.io/badge/OpenCV-5.0.0_Pre--Release-00f0ff.svg?logo=opencv&logoColor=white&style=for-the-badge" alt="OpenCV 5" /></a>
+  <a href="https://aws.amazon.com/ec2/graviton/"><img src="https://img.shields.io/badge/AWS-Graviton3_Neoverse_V1-FF9900.svg?logo=amazonaws&logoColor=white&style=for-the-badge" alt="AWS Graviton" /></a>
+  <a href="https://modelcontextprotocol.io"><img src="https://img.shields.io/badge/FastMCP-Model_Context_Protocol-6B46C1.svg?style=for-the-badge" alt="FastMCP" /></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.12-3776AB.svg?logo=python&logoColor=white&style=for-the-badge" alt="Python 3.12" /></a>
+  <a href="https://arulmuruganmcse2024-tech.github.io/speculab-mcp/"><img src="https://img.shields.io/badge/Live_Studio-GitHub_Pages-00f59b.svg?style=for-the-badge&logo=github" alt="Live Studio" /></a>
+  <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp/actions"><img src="https://img.shields.io/badge/CI_Matrix-21%2F21_Passing-success.svg?style=for-the-badge&logo=githubactions" alt="CI Matrix" /></a>
+</p>
 
-> 🌐 **Interactive Live Website & Metrology Studio**: [https://arulmuruganmcse2024-tech.github.io/speculab-mcp/](https://arulmuruganmcse2024-tech.github.io/speculab-mcp/)
+> 🎬 **Watch the film (2:45): [YouTube Video Demo](https://youtu.be/KvcrhT2gcyY?si=L-W0Y2NRqz1H47rM)** • 🌐 **[Live Interactive Studio](https://arulmuruganmcse2024-tech.github.io/speculab-mcp/)** • 🏆 **[Devpost Submission](https://devpost.com/software/speculab-mcp)** • 💻 **[GitHub Repository](https://github.com/arulmuruganmcse2024-tech/speculab-mcp)**
 
 SpecuLab-MCP is an industrial active-vision metrology system for high-specularity metallic foil surface inspection. By integrating OpenCV 5.0.0 and the Cloud-Optimized OpenCV Library (COOL) on AWS Graviton (accelerated by Arm KleidiCV SIMD) with Agentic Vision via the Model Context Protocol (FastMCP) and Amazon Bedrock, it autonomously eliminates specular glare through bounded, multi-view active homography fusion and detects micro-scale defects using a single unrigged morphological blackhat detector.
 

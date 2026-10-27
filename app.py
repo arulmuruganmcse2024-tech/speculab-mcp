@@ -85,18 +85,33 @@ CUSTOM_CSS = """
     transform: translateY(0);
 }
 
-/* Active Multi-View Healed Container with Glowing Neon Green Border */
+/* Active Multi-View Healed Container with Glowing Neon Green/Cyan Pulsing Border */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 16px rgba(0, 245, 155, 0.25), inset 0 0 8px rgba(0, 245, 155, 0.05);
+        border-color: #00f59b !important;
+    }
+    50% {
+        box-shadow: 0 0 35px rgba(0, 240, 255, 0.5), inset 0 0 18px rgba(0, 240, 255, 0.15);
+        border-color: #00f0ff !important;
+    }
+    100% {
+        box-shadow: 0 0 16px rgba(0, 245, 155, 0.25), inset 0 0 8px rgba(0, 245, 155, 0.05);
+        border-color: #00f59b !important;
+    }
+}
 .active-healed-container {
     border: 2px solid #00f59b !important;
     border-radius: 12px;
     padding: 12px;
     background: radial-gradient(circle at 50% 0%, rgba(0, 245, 155, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
     box-shadow: 0 0 25px rgba(0, 245, 155, 0.28), inset 0 0 15px rgba(0, 245, 155, 0.08);
+    animation: pulseGlow 3s infinite ease-in-out;
     transition: all 0.3s ease-in-out;
 }
 .active-healed-container:hover {
-    box-shadow: 0 0 40px rgba(0, 245, 155, 0.45), inset 0 0 25px rgba(0, 245, 155, 0.15);
-    border-color: #34d399 !important;
+    box-shadow: 0 0 45px rgba(0, 240, 255, 0.65), inset 0 0 25px rgba(0, 240, 255, 0.25);
+    border-color: #38bdf8 !important;
 }
 
 /* Passive Comparison Containers */
@@ -405,18 +420,19 @@ def main():
             )
             return
 
-        run_btn = st.button("▶️ Execute Active Multi-View Metrology Cycle", type="primary")
+        run_btn = st.button("🚀 Execute Inspection Cycle", type="primary")
 
         if run_btn:
             # Dynamic sequential steps appearing in real-time
             with st.status("🚀 Running Autonomous Active Vision Metrology Cycle...", expanded=True) as status_box:
                 st.write("🔍 **Phase 1: Profiling Glare & Evaluating Saturation Core/Penumbra...**")
-                time.sleep(0.12)
+                time.sleep(0.5)
                 st.write("⚖️ **Phase 2: Ranking Alternative Views (Entropy, Laplacian Sharpness, Overlap)...**")
-                time.sleep(0.12)
+                time.sleep(0.5)
                 st.write("🛠️ **Phase 3: Fusing Candidate Views via USAC_MAGSAC & SIMD Blending...**")
-                time.sleep(0.12)
+                time.sleep(0.5)
                 st.write("📏 **Phase 4: Executing Sub-Millimeter Blackhat Morphology Metrology...**")
+                time.sleep(0.3)
 
                 cycle_results = agent.run_inspection_cycle(
                     candidate_paths=candidate_views,
