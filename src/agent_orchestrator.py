@@ -29,10 +29,12 @@ from src.vision_engine import (
 )
 
 # Cross-platform file locking imports
-try:
-    import fcntl
-except ImportError:
-    fcntl = None
+fcntl = None
+if sys.platform != "win32":
+    try:
+        import fcntl  # type: ignore[import-untyped,import-not-found]
+    except ImportError:
+        fcntl = None
 
 
 class GlobalQuotaLimiter:

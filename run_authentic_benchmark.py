@@ -29,44 +29,49 @@ from src.vision_engine import PlanarActiveVisionEngine, get_opencv_runtime_metad
 
 def get_peak_rss_mb() -> float:
     """Return peak resident set size in megabytes cross-platform."""
-    try:
-        import resource
-        if sys.platform == "darwin":
-            return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024.0 * 1024.0), 2)
-        return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 2)
-    except ImportError:
+    if sys.platform != "win32":
         try:
-            import ctypes
-            from ctypes import wintypes
+            import resource  # type: ignore[import-untyped,import-not-found]
 
-            class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
-                _fields_ = [
-                    ("cb", wintypes.DWORD),
-                    ("PageFaultCount", wintypes.DWORD),
-                    ("PeakWorkingSetSize", ctypes.c_size_t),
-                    ("WorkingSetSize", ctypes.c_size_t),
-                    ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
-                    ("QuotaPagedPoolUsage", ctypes.c_size_t),
-                    ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
-                    ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
-                    ("PagefileUsage", ctypes.c_size_t),
-                    ("PeakPagefileUsage", ctypes.c_size_t),
-                ]
-
-            counters = PROCESS_MEMORY_COUNTERS()
-            counters.cb = ctypes.sizeof(PROCESS_MEMORY_COUNTERS)
-            handle = ctypes.windll.kernel32.GetCurrentProcess()
-            fn = getattr(ctypes.windll.kernel32, "K32GetProcessMemoryInfo", None)
-            if fn is None:
-                fn = getattr(ctypes.windll.psapi, "GetProcessMemoryInfo", None)
-            if fn is not None:
-                fn.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESS_MEMORY_COUNTERS), wintypes.DWORD]
-                fn.restype = wintypes.BOOL
-                if fn(handle, ctypes.byref(counters), counters.cb):
-                    return round(float(counters.PeakWorkingSetSize) / (1024.0 * 1024.0), 2)
-        except Exception:
+            if sys.platform == "darwin":
+                return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / (1024.0 * 1024.0), 2)
+            return round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 2)
+        except ImportError:
             pass
-        return 0.0
+
+    # Windows fallback via Win32 K32GetProcessMemoryInfo
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class PROCESS_MEMORY_COUNTERS(ctypes.Structure):
+            _fields_ = [
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        counters = PROCESS_MEMORY_COUNTERS()
+        counters.cb = ctypes.sizeof(PROCESS_MEMORY_COUNTERS)
+        handle = ctypes.windll.kernel32.GetCurrentProcess()
+        fn = getattr(ctypes.windll.kernel32, "K32GetProcessMemoryInfo", None)
+        if fn is None:
+            fn = getattr(ctypes.windll.psapi, "GetProcessMemoryInfo", None)
+        if fn is not None:
+            fn.argtypes = [wintypes.HANDLE, ctypes.POINTER(PROCESS_MEMORY_COUNTERS), wintypes.DWORD]
+            fn.restype = wintypes.BOOL
+            if fn(handle, ctypes.byref(counters), counters.cb):
+                return round(float(counters.PeakWorkingSetSize) / (1024.0 * 1024.0), 2)
+    except Exception:
+        pass
+    return 0.0
 
 
 def benchmark_single_iteration(

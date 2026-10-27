@@ -1,9 +1,17 @@
 @echo off
 REM One-Click Streamlit Demo Launcher for SpecuLab-MCP (Windows)
 
-if exist venv\Scripts\activate.bat (
-    call venv\Scripts\activate.bat
+setlocal
+
+if exist venv\Scripts\python.exe (
+    set "PYTHON_EXE=venv\Scripts\python.exe"
+) else if exist .venv\Scripts\python.exe (
+    set "PYTHON_EXE=.venv\Scripts\python.exe"
+) else (
+    set "PYTHON_EXE=python"
 )
 
-echo Starting SpecuLab-MCP Streamlit Dashboard...
-streamlit run app.py
+echo ============================================================
+echo Starting SpecuLab-MCP Interactive Active Vision Dashboard...
+echo ============================================================
+"%PYTHON_EXE%" -m streamlit run app.py %*
