@@ -1,0 +1,71 @@
+name: ARM64 Neoverse & x86_64 Benchmarks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  benchmark-and-test:
+    name: Build & Benchmark on ${{ matrix.arch }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-arm
+            arch: aarch64
+            label: linux_arm64_neoverse_simd
+          - os: ubuntu-24.04
+            arch: x86_64
+            label: linux_x86_64_baseline
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgl1-mesa-glx libglib2.0-0 curl
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-subtests
+
+      - name: Run End-to-End Test Suite (21/21 Tests)
+        run: |
+          pytest -v
+
+      - name: Run Smoke Test E2E
+        run: |
+          python smoke_test_e2e.py
+
+      - name: Verify Hardware Architecture & COOL Environment
+        run: |
+          chmod +x scripts/verify_cool.sh
+          bash scripts/verify_cool.sh
+
+      - name: Run Authentic Micro-Benchmark (${{ matrix.label }})
+        run: |
+          python run_authentic_benchmark.py --label ${{ matrix.label }} --threads 4 --iterations 30 --hourly-cost 0.0
+
+      - name: Upload Benchmark Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: speculab-arm64-x86-benchmarks-${{ matrix.arch }}
+          path: |
+            benchmark_${{ matrix.label }}.json
+            logs/cool_verification.json
+            logs/cool_verification.txt
+            logs/benchmark_*.log
+          if-no-files-found: warn

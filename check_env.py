@@ -97,6 +97,8 @@ def main() -> int:
             "instance_type": "LOCAL_DEV",
             "ami_id": "LOCAL_DEV",
             "architecture": arch,
+            "platform": platform.platform(),
+            "machine": platform.machine(),
             "cool_venv_path": cool_path,
             "cv2_version": cv_ver,
             "cv2_file": cv_file,

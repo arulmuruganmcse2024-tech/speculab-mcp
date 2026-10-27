@@ -2,6 +2,8 @@
   "instance_type": "LOCAL_DEV",
   "ami_id": "LOCAL_DEV",
   "architecture": "AMD64",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "machine": "AMD64",
   "cool_venv_path": "C:\\Users\\arulm\\OneDrive\\Documents\\Hackathon\\speculab-mcp\\venv",
   "cv2_version": "5.0.0",
   "cv2_file": "C:\\Users\\arulm\\OneDrive\\Documents\\Hackathon\\speculab-mcp\\venv\\Lib\\site-packages\\cv2\\__init__.py",

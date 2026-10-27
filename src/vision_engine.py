@@ -88,6 +88,15 @@ class PlanarActiveVisionEngine:
         self.detection_cfg = self.config.get("detection", {})
         self.optional_features = self.config.get("optional_features", {})
 
+        self.CORE_VAL_THRESH: int = int(self.glare_cfg.get("core_val_thresh", 240))
+        self.CORE_SAT_THRESH: int = int(self.glare_cfg.get("core_sat_thresh", 35))
+        self.PENUMBRA_MIN_VAL: int = int(self.glare_cfg.get("penumbra_min_val", 210))
+        self.PENUMBRA_MEDIAN_OFFSET: int = int(self.glare_cfg.get("penumbra_median_offset", 35))
+        self.PENUMBRA_SAT_THRESH: int = int(self.glare_cfg.get("penumbra_sat_thresh", 50))
+        self.SEED_DILATION_PX: int = int(self.glare_cfg.get("seed_dilation_px", 21))
+        self.FINAL_DILATION_PX: int = int(self.glare_cfg.get("final_dilation_px", 9))
+        self.USAC_REPROJ_THRESH: float = float(self.healing_cfg.get("usac_reproj_thresh_px", 1.5))
+
         # Canonical destination corners
         self.dst_0 = np.array(
             [[100.0, 200.0], [500.0, 200.0], [500.0, 600.0], [100.0, 600.0]],
@@ -302,6 +311,7 @@ class PlanarActiveVisionEngine:
         rectified_bgr: np.ndarray,
         roi: Optional[Tuple[int, int, int, int]] = None,
         optional_flags: Optional[Dict[str, Any]] = None,
+        compute_entropy_and_sharpness: bool = True,
     ) -> Tuple[np.ndarray, float, float, Dict[str, Any]]:
         """Compute two-stage hysteresis glare mask and glare-excluded sharpness (M-26, M-24, M-23)."""
         opt = optional_flags if optional_flags is not None else self.optional_features
@@ -315,68 +325,73 @@ class PlanarActiveVisionEngine:
 
         roi_bgr = rectified_bgr[ry : ry + rh, rx : rx + rw]
         hsv = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2HSV)
-        s = hsv[..., 1]
         v = hsv[..., 2]
 
-        core_val_thresh = int(self.glare_cfg.get("core_val_thresh", 240))
-        core_sat_thresh = int(self.glare_cfg.get("core_sat_thresh", 35))
-        penumbra_min_val = int(self.glare_cfg.get("penumbra_min_val", 210))
-        penumbra_median_offset = int(self.glare_cfg.get("penumbra_median_offset", 35))
-        penumbra_sat_thresh = int(self.glare_cfg.get("penumbra_sat_thresh", 50))
-        seed_dilation_px = int(self.glare_cfg.get("seed_dilation_px", 21))
-        final_dilation_px = int(self.glare_cfg.get("final_dilation_px", 9))
+        # Core seed mask via native C++ SIMD inRange
+        core_seed = cv2.inRange(
+            hsv,
+            (0, 0, self.CORE_VAL_THRESH),
+            (180, self.CORE_SAT_THRESH, 255),
+        )
 
-        core_seed = (v >= core_val_thresh) & (s <= core_sat_thresh)
-
-        if np.count_nonzero(core_seed) == 0:
+        if cv2.countNonZero(core_seed) == 0:
             mask_dilated = np.zeros((rh, rw), dtype=np.uint8)
             glare_pct = 0.0
         else:
             median_v = float(np.median(v))
-            penumbra_val_cutoff = max(float(penumbra_min_val), median_v + penumbra_median_offset)
-            penumbra_candidates = (v >= penumbra_val_cutoff) & (s <= penumbra_sat_thresh)
+            penumbra_val_cutoff = max(float(self.PENUMBRA_MIN_VAL), median_v + self.PENUMBRA_MEDIAN_OFFSET)
+            pen_val_thresh = int(penumbra_val_cutoff)
+            penumbra_candidates = cv2.inRange(
+                hsv,
+                (0, 0, pen_val_thresh),
+                (180, self.PENUMBRA_SAT_THRESH, 255),
+            )
 
-            k_seed = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (seed_dilation_px, seed_dilation_px))
-            core_dilated = cv2.dilate(core_seed.astype(np.uint8) * 255, k_seed)
-            penumbra_connected = (core_dilated > 0) & penumbra_candidates
+            k_seed = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (self.SEED_DILATION_PX, self.SEED_DILATION_PX))
+            core_dilated = cv2.dilate(core_seed, k_seed)
+            penumbra_connected = cv2.bitwise_and(core_dilated, penumbra_candidates)
 
-            full_seed = (core_seed | penumbra_connected).astype(np.uint8) * 255
-            k_final = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (final_dilation_px, final_dilation_px))
+            full_seed = cv2.bitwise_or(core_dilated, penumbra_connected)
+            k_final = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (self.FINAL_DILATION_PX, self.FINAL_DILATION_PX))
             mask_dilated = cv2.dilate(full_seed, k_final)
-            glare_pct = round((float(np.count_nonzero(mask_dilated)) / float(rw * rh)) * 100.0, 3)
+            glare_pct = round((float(cv2.countNonZero(mask_dilated)) / float(rw * rh)) * 100.0, 3)
 
-        # Sobel gradient Shannon entropy
-        gray_roi = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2GRAY)
-        gx = cv2.Sobel(gray_roi, cv2.CV_64F, 1, 0, ksize=3)
-        gy = cv2.Sobel(gray_roi, cv2.CV_64F, 0, 1, ksize=3)
-        mag = np.hypot(gx, gy)
-        hist, _ = np.histogram(mag, bins=64, range=(0, 255))
-        probs = hist.astype(np.float64) / max(1.0, float(np.sum(hist)))
-        probs = probs[probs > 0]
-        entropy_bits = round(float(-np.sum(probs * np.log2(probs))), 3)
-
-        # Glare-excluded sharpness (M-24)
-        lap = cv2.Laplacian(gray_roi, cv2.CV_64F)
-        glare_free_pixels = lap[mask_dilated == 0]
-        if len(glare_free_pixels) > 0:
-            glare_free_sharpness = round(float(np.var(glare_free_pixels)), 3)
-        else:
-            glare_free_sharpness = round(float(np.var(lap)), 3)
-
-        # Optional M-23: Centroid & NBV instruction
+        entropy_bits = 0.0
+        glare_free_sharpness = 0.0
         glare_centroid_xy = None
         predicted_nbv_instruction = None
-        if opt.get("enable_nbv_pose_prediction", False) and glare_pct > 0:
-            m = cv2.moments(mask_dilated)
-            if m["m00"] > 0:
-                cx = m["m10"] / m["m00"]
-                cy = m["m01"] / m["m00"]
-                glare_centroid_xy = [round(float(cx), 1), round(float(cy), 1)]
-                dx = cx - (rw / 2.0)
-                dy = cy - (rh / 2.0)
-                h_dir = "left" if dx > 0 else "right"
-                v_dir = "up" if dy > 0 else "down"
-                predicted_nbv_instruction = f"Tilt phone {h_dir} by ~5 deg and {v_dir} by ~5 deg"
+
+        if compute_entropy_and_sharpness:
+            # Sobel gradient Shannon entropy
+            gray_roi = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2GRAY)
+            gx = cv2.Sobel(gray_roi, cv2.CV_64F, 1, 0, ksize=3)
+            gy = cv2.Sobel(gray_roi, cv2.CV_64F, 0, 1, ksize=3)
+            mag = cv2.magnitude(gx, gy)
+            hist, _ = np.histogram(mag, bins=64, range=(0, 255))
+            probs = hist.astype(np.float64) / max(1.0, float(np.sum(hist)))
+            probs = probs[probs > 0]
+            entropy_bits = round(float(-np.sum(probs * np.log2(probs))), 3)
+
+            # Glare-excluded sharpness (M-24)
+            lap = cv2.Laplacian(gray_roi, cv2.CV_64F)
+            glare_free_pixels = lap[mask_dilated == 0]
+            if len(glare_free_pixels) > 0:
+                glare_free_sharpness = round(float(np.var(glare_free_pixels)), 3)
+            else:
+                glare_free_sharpness = round(float(np.var(lap)), 3)
+
+            # Optional M-23: Centroid & NBV instruction
+            if opt.get("enable_nbv_pose_prediction", False) and glare_pct > 0:
+                m = cv2.moments(mask_dilated)
+                if m["m00"] > 0:
+                    cx = m["m10"] / m["m00"]
+                    cy = m["m01"] / m["m00"]
+                    glare_centroid_xy = [round(float(cx), 1), round(float(cy), 1)]
+                    dx = cx - (rw / 2.0)
+                    dy = cy - (rh / 2.0)
+                    h_dir = "left" if dx > 0 else "right"
+                    v_dir = "up" if dy > 0 else "down"
+                    predicted_nbv_instruction = f"Tilt phone {h_dir} by ~5 deg and {v_dir} by ~5 deg"
 
         metadata = {
             "glare_free_sharpness": glare_free_sharpness,
@@ -436,7 +451,7 @@ class PlanarActiveVisionEngine:
                 dst_pts = np.float32([kp_acc[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
                 method = getattr(cv2, "USAC_MAGSAC", cv2.RANSAC)
                 H_refine, inlier_mask = cv2.findHomography(
-                    src_pts, dst_pts, method=method, ransacReprojThreshold=reproj_thresh
+                    src_pts, dst_pts, method=method, ransacReprojThreshold=self.USAC_REPROJ_THRESH, maxIters=300
                 )
                 if H_refine is not None and inlier_mask is not None:
                     count_inliers = int(np.sum(inlier_mask))
@@ -477,8 +492,10 @@ class PlanarActiveVisionEngine:
             except Exception:
                 pass
 
-        # 3. Compute glare mask on aligned alternative image
-        mask_alt_aligned, _, _, _ = self.compute_glare_mask(aligned_alt, roi=roi, optional_flags=optional_flags)
+        # 3. Compute glare mask on aligned alternative image (skip redundant entropy/sharpness)
+        mask_alt_aligned, _, _, _ = self.compute_glare_mask(
+            aligned_alt, roi=roi, optional_flags=optional_flags, compute_entropy_and_sharpness=False
+        )
 
         newly_healable = (unhealed_roi_mask > 0) & (mask_alt_aligned == 0)
         still_unhealed = ((unhealed_roi_mask > 0) & (mask_alt_aligned > 0)).astype(np.uint8) * 255
@@ -486,37 +503,48 @@ class PlanarActiveVisionEngine:
         roi_cur = acc_canvas[ry : ry + rh, rx : rx + rw].copy()
         roi_alt = aligned_alt[ry : ry + rh, rx : rx + rw].copy()
 
-        mutually_valid = (unhealed_roi_mask == 0) & (mask_alt_aligned == 0)
-        n_mutually_valid = int(np.count_nonzero(mutually_valid))
+        valid_mask_u8 = cv2.bitwise_and(
+            (unhealed_roi_mask == 0).astype(np.uint8) * 255,
+            (mask_alt_aligned == 0).astype(np.uint8) * 255,
+        )
+        n_mutually_valid = int(cv2.countNonZero(valid_mask_u8))
 
-        # 4. Radiometric Gain Matching (M-22, M-25)
-        roi_alt_gain = roi_alt.astype(np.float32)
-
+        # 4. Radiometric Gain Matching (M-22, M-25) via native OpenCV SIMD masked mean and convertScaleAbs
         if not opt.get("enable_2d_illumination_field_gain", False):
             if n_mutually_valid >= 200:
                 clip_min = float(self.healing_cfg.get("gain_clip_min", 0.60))
                 clip_max = float(self.healing_cfg.get("gain_clip_max", 1.60))
-                for c in range(3):
-                    cur_mean = float(np.mean(roi_cur[..., c][mutually_valid]))
-                    alt_mean = max(1.0, float(np.mean(roi_alt[..., c][mutually_valid])))
-                    gain_c = float(np.clip(cur_mean / alt_mean, clip_min, clip_max))
-                    roi_alt_gain[..., c] = roi_alt[..., c].astype(np.float32) * gain_c
+                mean_cur = cv2.mean(roi_cur, mask=valid_mask_u8)[:3]
+                mean_alt = cv2.mean(roi_alt, mask=valid_mask_u8)[:3]
+                gains = [
+                    float(np.clip(mean_cur[c] / max(1.0, mean_alt[c]), clip_min, clip_max))
+                    for c in range(3)
+                ]
+                alt_chs = cv2.split(roi_alt)
+                roi_alt_gain = cv2.merge([
+                    cv2.convertScaleAbs(alt_chs[c], alpha=gains[c]) for c in range(3)
+                ])
             else:
                 # Border median fallback (M-22)
                 bw = min(20, rh // 4, rw // 4)
-                border_mask = np.zeros((rh, rw), dtype=bool)
-                border_mask[:bw, :] = True
-                border_mask[-bw:, :] = True
-                border_mask[:, :bw] = True
-                border_mask[:, -bw:] = True
+                border_mask_u8 = np.zeros((rh, rw), dtype=np.uint8)
+                border_mask_u8[:bw, :] = 255
+                border_mask_u8[-bw:, :] = 255
+                border_mask_u8[:, :bw] = 255
+                border_mask_u8[:, -bw:] = 255
 
                 clip_min = float(self.healing_cfg.get("low_overlap_clip_min", 0.75))
                 clip_max = float(self.healing_cfg.get("low_overlap_clip_max", 1.35))
-                for c in range(3):
-                    cur_med = float(np.median(roi_cur[..., c][border_mask]))
-                    alt_med = max(1.0, float(np.median(roi_alt[..., c][border_mask])))
-                    gain_c = float(np.clip(cur_med / alt_med, clip_min, clip_max))
-                    roi_alt_gain[..., c] = roi_alt[..., c].astype(np.float32) * gain_c
+                mean_cur = cv2.mean(roi_cur, mask=border_mask_u8)[:3]
+                mean_alt = cv2.mean(roi_alt, mask=border_mask_u8)[:3]
+                gains = [
+                    float(np.clip(mean_cur[c] / max(1.0, mean_alt[c]), clip_min, clip_max))
+                    for c in range(3)
+                ]
+                alt_chs = cv2.split(roi_alt)
+                roi_alt_gain = cv2.merge([
+                    cv2.convertScaleAbs(alt_chs[c], alpha=gains[c]) for c in range(3)
+                ])
         else:
             # 2D illumination field gain (M-25)
             cur_f = roi_cur.astype(np.float32)
@@ -524,26 +552,24 @@ class PlanarActiveVisionEngine:
             blur_cur = cv2.GaussianBlur(cur_f, (101, 101), 35)
             blur_alt = np.maximum(1.0, cv2.GaussianBlur(alt_f, (101, 101), 35))
             gain_2d = np.clip(blur_cur / blur_alt, 0.60, 1.60)
-            roi_alt_gain = alt_f * gain_2d
+            roi_alt_gain = np.clip(alt_f * gain_2d, 0.0, 255.0).astype(np.uint8)
 
-        roi_alt_gain = np.clip(roi_alt_gain, 0.0, 255.0)
-
-        # 5. Dilated Feather Blending (M-11, FQ7)
+        # 5. Dilated Feather Blending (M-11, FQ7) via cv2.blendLinear (AVX2/NEON/KleidiCV SIMD)
         pre_feather_px = int(self.healing_cfg.get("pre_feather_dilation_px", 11))
         k_pfd = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (pre_feather_px, pre_feather_px))
-        nh_dilated = cv2.dilate((newly_healable.astype(np.uint8) * 255), k_pfd)
-        nh_dilated = (nh_dilated > 0) & (mask_alt_aligned == 0)
+        nh_u8 = cv2.bitwise_and(unhealed_roi_mask, cv2.bitwise_not(mask_alt_aligned))
+        nh_dilated = cv2.dilate(nh_u8, k_pfd)
+        nh_dilated = cv2.bitwise_and(nh_dilated, cv2.bitwise_not(mask_alt_aligned))
 
         feather_k = int(self.healing_cfg.get("feather_kernel_px", 21))
         feather_sigma = float(self.healing_cfg.get("feather_sigma", 5.0))
-        alpha = cv2.GaussianBlur(nh_dilated.astype(np.float32), (feather_k, feather_k), feather_sigma)
-        alpha = np.clip(alpha, 0.0, 1.0)[..., None]
+        alpha = cv2.GaussianBlur((nh_dilated > 0).astype(np.float32), (feather_k, feather_k), feather_sigma)
+        alpha_f32 = np.clip(alpha, 0.0, 1.0)
+        one_minus_alpha_f32 = 1.0 - alpha_f32
 
-        blended_roi = (
-            roi_cur.astype(np.float32) * (1.0 - alpha) + roi_alt_gain * alpha
-        )
+        blended_roi = cv2.blendLinear(roi_cur, roi_alt_gain, one_minus_alpha_f32, alpha_f32)
         new_acc_canvas = acc_canvas.copy()
-        new_acc_canvas[ry : ry + rh, rx : rx + rw] = np.clip(blended_roi, 0.0, 255.0).astype(np.uint8)
+        new_acc_canvas[ry : ry + rh, rx : rx + rw] = blended_roi
 
         # Optional M-28: Seam gradient spike ratio
         seam_gradient_spike_ratio = 1.0

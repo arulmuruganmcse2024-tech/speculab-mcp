@@ -140,6 +140,38 @@ def apply_glare_spot(
     canvas[roi_y0:roi_y1, roi_x0:roi_x1] = np.clip(blended, 0, 255).astype(np.uint8)
 
 
+def apply_twin_lobe_glare(
+    canvas: np.ndarray,
+    center_xy: tuple,
+    radius_x: int,
+    lobe_ry: int = 12,
+    gap_half: int = 11,
+    halo_pad: int = 22,
+) -> None:
+    """Model realistic multi-diode LED bar reflection: draw two parallel bright saturated glare lobes
+    (V=254, S=0, each 18..28 px wide) separated by a 22 px (1.1 mm) normal-foil gap (V=168), surrounded
+    by a V=222, S=20 penumbra halo that bridges across both lobes."""
+    cx, cy = center_xy
+    h_c, w_c = canvas.shape[:2]
+
+    # 1. Penumbra halo (V=222, S=20 bridging across both lobes)
+    halo_ry = lobe_ry * 2 + gap_half + halo_pad
+    cv2.ellipse(canvas, (cx, cy), (radius_x + halo_pad, halo_ry), 0, 0, 360, (222, 222, 222), -1)
+
+    # 2. Upper and lower bright saturated glare lobes (V=254, S=0)
+    y_upper = cy - gap_half - lobe_ry
+    y_lower = cy + gap_half + lobe_ry
+    cv2.ellipse(canvas, (cx, y_upper), (radius_x, lobe_ry), 0, 0, 360, (254, 254, 254), -1)
+    cv2.ellipse(canvas, (cx, y_lower), (radius_x, lobe_ry), 0, 0, 360, (254, 254, 254), -1)
+
+    # 3. Restore normal-foil gap (V=168, 22 px height from cy - 11 to cy + 11)
+    x0 = max(0, cx - radius_x)
+    x1 = min(w_c, cx + radius_x)
+    y0 = max(0, cy - gap_half)
+    y1 = min(h_c, cy + gap_half)
+    canvas[y0:y1, x0:x1] = 168
+
+
 def render_camera_frame(
     card_2000x800: np.ndarray,
     tilt_deg: float = 0.0,
@@ -161,9 +193,9 @@ def render_camera_frame(
 
     c = card_2000x800.copy()
     if blur_foil_interior:
-        # Heavily blur foil interior (31x31, sigma=10) while preserving crisp ArUco markers
-        foil_crop = c[200:600, 600:1400]
-        c[200:600, 600:1400] = cv2.GaussianBlur(foil_crop, (31, 31), 10.0)
+        # Heavily blur foil interior (35x35, sigma=12) including border margin
+        # to drop relative_sharpness_ratio < 0.30 while leaving ArUco markers (80:520, 1480:1920) crisp
+        c[170:630, 570:1430] = cv2.GaussianBlur(c[170:630, 570:1430], (35, 35), 12.0)
 
     if corrupt_marker0:
         # Obscure Marker ID 0 with gray tape
@@ -366,7 +398,7 @@ def generate_specimen_dataset() -> None:
     c_05 = create_base_canonical_card(seed=205)
     cv2.circle(c_05, (980, 400), 8, (25, 25, 25), -1)  # ~15 px = 0.75 mm
     c_05_v0 = c_05.copy()
-    apply_glare_spot(c_05_v0, center_xy=(980, 400), radius_x=120, radius_y=60)
+    apply_twin_lobe_glare(c_05_v0, center_xy=(980, 400), radius_x=120)
     c_05_v1 = c_05.copy()
     apply_glare_spot(c_05_v1, center_xy=(750, 250), radius_x=70, radius_y=35)
     c_05_v2 = c_05.copy()
@@ -386,20 +418,19 @@ def generate_specimen_dataset() -> None:
         },
     )
 
-    # Specimen 06: Overlap Trap (has_defect: true, 0.95 mm blind dent at (1000, 400)).
-    # In view 0: glare covers dent (glare ~18%).
-    # In view 1: small glare spot (glare ~3.5%) sits directly over dent (so 2A and 2B select view 1 and fail!).
-    # In view 2: moderate glare band (glare ~6.0%) in upper corner (680, 240) completely away from defect (0% overlap),
-    # so 2C and 2D rank view 2 #1 and recover the defect!
+    # Specimen 06: Overlap Trap (has_defect: true, 0.95 mm blind dent at (950, 400)).
+    # view 0 glare covers defect at (950, 400).
+    # view 1 has small 2.5% single-lobe glare spot sitting directly on (950, 400) (so 2A and 2B select view 1 and fail!).
+    # view 2 has 6.5% glare band far away at (1250, 260) (0.0% overlap with view 0 glare), so 2C and 2D pick view 2 and catch defect!
     c_06 = create_base_canonical_card(seed=206)
-    cv2.circle(c_06, (1000, 400), 10, (50, 50, 50), -1)
-    cv2.circle(c_06, (1000, 400), 4, (30, 30, 30), -1)  # ~19 px = 0.95 mm
+    cv2.circle(c_06, (950, 400), 10, (50, 50, 50), -1)
+    cv2.circle(c_06, (950, 400), 4, (30, 30, 30), -1)  # ~19 px = 0.95 mm
     c_06_v0 = c_06.copy()
-    apply_glare_spot(c_06_v0, center_xy=(1000, 400), radius_x=160, radius_y=80)
+    apply_twin_lobe_glare(c_06_v0, center_xy=(950, 400), radius_x=130)
     c_06_v1 = c_06.copy()
-    apply_glare_spot(c_06_v1, center_xy=(1000, 400), radius_x=70, radius_y=38)  # ~3.5% glare right over dent
+    apply_glare_spot(c_06_v1, center_xy=(950, 400), radius_x=55, radius_y=28)  # ~2.5% single-lobe glare right over defect
     c_06_v2 = c_06.copy()
-    apply_glare_spot(c_06_v2, center_xy=(680, 240), radius_x=95, radius_y=48)  # ~6.0% glare in upper corner, 0% overlap
+    apply_glare_spot(c_06_v2, center_xy=(1250, 260), radius_x=105, radius_y=50)  # ~6.5% glare band, 0% overlap
     save_specimen(
         "specimen_06",
         render_camera_frame(c_06_v0, tilt_deg=0.0, exposure_scale=1.0),
@@ -410,21 +441,22 @@ def generate_specimen_dataset() -> None:
             "has_defect": True,
             "defect_subtype": "blind_pin_dent",
             "true_length_mm": 0.95,
-            "gt_bbox_canonical": [990, 390, 20, 20],
-            "note": f"{LABEL_DISCLAIMER} - Defective 0.95 mm blind dent at (1000, 400); tests overlap-aware 2C policy vs 2A and 2B.",
+            "gt_bbox_canonical": [940, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.95 mm blind dent at (950, 400); tests overlap-aware 2C policy vs 2A and 2B.",
         },
     )
 
-    # Specimen 07: Motion-Blur Trap (has_defect: true, 0.80 mm scratch at (1000, 400)).
-    # view 1 has 0% glare (candidate_glare_pct == 0.0%, overlap == 0.0%) so 2A and 2B pick view 1,
-    # BUT foil interior has heavy Gaussian blur (ksize=(31, 31), sigma=10), smearing defect so 2A and 2B miss it
-    # and triggering blur_degraded: True (relative_sharpness_ratio < 0.45), causing 2C and 2D to pick sharp, glare-free view 2!
+    # Specimen 07: Blur Trap (has_defect: true, 0.80 mm scratch at (1000, 400)).
+    # view 0 glare covers defect. view 1 has 0.0% glare (overlap = 0.0%), so 2A and 2B pick view 1,
+    # but view 1's foil ROI is motion-blurred (GaussianBlur 35x35, sigma=12) which erases defect (2A and 2B miss it)
+    # and drops relative_sharpness_ratio < 0.30 (blur_degraded = True), so 2C and 2D pick sharp view 2 and catch defect!
     c_07 = create_base_canonical_card(seed=207)
     cv2.line(c_07, (992, 400), (1008, 400), (32, 32, 32), 4)  # 16 px = 0.80 mm
     c_07_v0 = c_07.copy()
-    apply_glare_spot(c_07_v0, center_xy=(1000, 400), radius_x=130, radius_y=65)
+    apply_twin_lobe_glare(c_07_v0, center_xy=(1000, 400), radius_x=130)
     c_07_v1 = c_07.copy()  # 0% glare, foil blurred
-    c_07_v2 = c_07.copy()  # 0% glare, sharp
+    c_07_v2 = c_07.copy()  # small 1.5% glare spot away at (1260, 520), sharp
+    apply_glare_spot(c_07_v2, center_xy=(1260, 520), radius_x=45, radius_y=22)
     save_specimen(
         "specimen_07",
         render_camera_frame(c_07_v0, tilt_deg=0.0, exposure_scale=1.0),
@@ -440,19 +472,21 @@ def generate_specimen_dataset() -> None:
         },
     )
 
-    # Specimen 08: 2-Pass Multi-View Fusion (has_defect: true, 0.90 mm puncture at (900, 400)).
-    # view 0 has wide glare band covering both left half (where defect sits) and right half (glare ~25%).
-    # In view 1: glare covers left half (including defect at 900, 400), leaving residual glare > 2.0% after Pass 1.
-    # In view 2: glare cleared from left half, so 2-pass fusion (view 1 + view 2) heals ROI and uncovers defect!
-    # 2A_naive_view1 only fuses view 1, so it misses the defect!
+    # Specimen 08: 2-Pass Multi-View Fusion (has_defect: true, 0.95 mm puncture at (820, 400)).
+    # view 0 has twin-lobe glare covering both (820, 400) (where a crisp 0.95 mm dark puncture sits) and (1150, 400).
+    # view 1 has glare covering (820, 400) (residual_glare_pct > 2.5% after fusing view 1) while clearing (1150, 400).
+    # view 2 has 0% glare at (820, 400) and 1.5% glare at (1150, 400) (which was already healed by view 1!).
+    # Thus 2A_naive_view1 (which stops after fusing view 1) misses the defect, whereas 2C and 2D fuse view 1 + view 2
+    # (view_attempts_used == 2, residual_glare_pct == 0.0%) and catch the 0.95 mm puncture!
     c_08 = create_base_canonical_card(seed=208)
-    cv2.circle(c_08, (900, 400), 9, (25, 25, 25), -1)  # 18 px = 0.90 mm on left half
+    cv2.circle(c_08, (820, 400), 10, (25, 25, 25), -1)  # ~19 px = 0.95 mm puncture
     c_08_v0 = c_08.copy()
-    apply_glare_spot(c_08_v0, center_xy=(1000, 400), radius_x=260, radius_y=85)  # Wide glare covering left and right
+    apply_twin_lobe_glare(c_08_v0, center_xy=(820, 400), radius_x=90)
+    apply_twin_lobe_glare(c_08_v0, center_xy=(1150, 400), radius_x=90)
     c_08_v1 = c_08.copy()
-    apply_glare_spot(c_08_v1, center_xy=(890, 400), radius_x=130, radius_y=65)  # Glare on left half over defect
+    apply_glare_spot(c_08_v1, center_xy=(820, 400), radius_x=75, radius_y=38)  # Glare covering (820, 400)
     c_08_v2 = c_08.copy()
-    apply_glare_spot(c_08_v2, center_xy=(1260, 260), radius_x=65, radius_y=35)  # Glare cleared from left half
+    apply_glare_spot(c_08_v2, center_xy=(1150, 400), radius_x=45, radius_y=24)  # ~1.5% glare at (1150, 400), 0% at 820
     save_specimen(
         "specimen_08",
         render_camera_frame(c_08_v0, tilt_deg=0.0, exposure_scale=1.0),
@@ -462,21 +496,25 @@ def generate_specimen_dataset() -> None:
             "split": "held_out",
             "has_defect": True,
             "defect_subtype": "through_hole",
-            "true_length_mm": 0.90,
-            "gt_bbox_canonical": [890, 390, 20, 20],
-            "note": f"{LABEL_DISCLAIMER} - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view 2).",
+            "true_length_mm": 0.95,
+            "gt_bbox_canonical": [810, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.95 mm puncture requiring 2 fusions (left half healed in view 2).",
         },
     )
 
-    # Specimen 09: Defective 0.65 mm pinhole under localized 1.2% glare causing passive disagreement trigger
+    # Specimen 09: Disagreement Trigger (has_defect: true, 0.85 mm puncture at (980, 400)).
+    # view 0 has a compact twin-lobe glare spot covering 1.4% of the ROI (<= 2.0% gate) right over a 0.85 mm dark puncture,
+    # while view 1 is glare-free (0.0% glare). In view 0, 1A_passive_unmasked fires REJECT on the twin-lobe glare while
+    # 1B_passive_glare_masked masks it out and outputs PASS! That sets glare_disagreement = True, triggering 2C and 2D
+    # to fuse view 1, heal the 1.4% glare spot, and catch the true 0.85 mm puncture!
     c_09 = create_base_canonical_card(seed=209)
-    cv2.circle(c_09, (1000, 400), 7, (28, 28, 28), -1)  # ~13 px = 0.65 mm
+    cv2.circle(c_09, (980, 400), 9, (25, 25, 25), -1)  # ~17 px = 0.85 mm
     c_09_v0 = c_09.copy()
-    apply_glare_spot(c_09_v0, center_xy=(995, 395), radius_x=45, radius_y=25)  # Localized ~1.2% glare over pinhole
-    c_09_v1 = c_09.copy()
-    apply_glare_spot(c_09_v1, center_xy=(750, 250), radius_x=50, radius_y=25)
+    apply_twin_lobe_glare(c_09_v0, center_xy=(980, 400), radius_x=20, lobe_ry=8, gap_half=9, halo_pad=6)
+    cv2.circle(c_09_v0, (980, 400), 9, (25, 25, 25), -1)  # puncture in gap under twin lobes
+    c_09_v1 = c_09.copy()  # 0.0% glare
     c_09_v2 = c_09.copy()
-    apply_glare_spot(c_09_v2, center_xy=(1250, 550), radius_x=50, radius_y=25)
+    apply_glare_spot(c_09_v2, center_xy=(1250, 550), radius_x=45, radius_y=22)
     save_specimen(
         "specimen_09",
         render_camera_frame(c_09_v0, tilt_deg=0.0, exposure_scale=1.0),
@@ -486,21 +524,22 @@ def generate_specimen_dataset() -> None:
             "split": "held_out",
             "has_defect": True,
             "defect_subtype": "through_hole",
-            "true_length_mm": 0.65,
-            "gt_bbox_canonical": [990, 390, 20, 20],
-            "note": f"{LABEL_DISCLAIMER} - Defective 0.65 mm pinhole under 1.2% glare causing passive disagreement trigger.",
+            "true_length_mm": 0.85,
+            "gt_bbox_canonical": [970, 390, 20, 20],
+            "note": f"{LABEL_DISCLAIMER} - Defective 0.85 mm pinhole under 1.4% glare causing passive disagreement trigger.",
         },
     )
 
-    # Specimen 10: Defective 0.85 mm puncture with persistent omnidirectional glare in all 3 views -> ESCALATE
+    # Specimen 10: Omnidirectional Persistent Glare (has_defect: true, 0.85 mm puncture at (1000, 400)).
+    # Heavy glare covers (650..1350, 230..570) across all 3 views (view_0, view_1, view_2), forcing ESCALATE_UNRESOLVED_OCCLUSION after 2 view attempts.
     c_10 = create_base_canonical_card(seed=210)
     cv2.circle(c_10, (1000, 400), 9, (25, 25, 25), -1)  # ~17 px = 0.85 mm
     c_10_v0 = c_10.copy()
-    apply_glare_spot(c_10_v0, center_xy=(1000, 400), radius_x=160, radius_y=80)
+    apply_twin_lobe_glare(c_10_v0, center_xy=(1000, 400), radius_x=220, lobe_ry=24, gap_half=14, halo_pad=35)
     c_10_v1 = c_10.copy()
-    apply_glare_spot(c_10_v1, center_xy=(1000, 400), radius_x=150, radius_y=75)
+    apply_twin_lobe_glare(c_10_v1, center_xy=(1000, 400), radius_x=210, lobe_ry=24, gap_half=14, halo_pad=35)
     c_10_v2 = c_10.copy()
-    apply_glare_spot(c_10_v2, center_xy=(1000, 400), radius_x=155, radius_y=78)
+    apply_twin_lobe_glare(c_10_v2, center_xy=(1000, 400), radius_x=215, lobe_ry=24, gap_half=14, halo_pad=35)
     save_specimen(
         "specimen_10",
         render_camera_frame(c_10_v0, tilt_deg=0.0, exposure_scale=1.0),
@@ -520,7 +559,7 @@ def generate_specimen_dataset() -> None:
     c_11 = create_base_canonical_card(seed=211)
     cv2.circle(c_11, (1000, 400), 2, (38, 38, 38), -1)  # 4 px = 0.20 mm < 0.35 mm
     c_11_v0 = c_11.copy()
-    apply_glare_spot(c_11_v0, center_xy=(1000, 400), radius_x=100, radius_y=50)
+    apply_twin_lobe_glare(c_11_v0, center_xy=(1000, 400), radius_x=120)
     c_11_v1 = c_11.copy()
     apply_glare_spot(c_11_v1, center_xy=(750, 250), radius_x=60, radius_y=30)
     c_11_v2 = c_11.copy()
@@ -540,10 +579,10 @@ def generate_specimen_dataset() -> None:
         },
     )
 
-    # Specimen 12: Clean foil with glare in view 0 and clean view 1 (rotated 90 deg portrait)
+    # Specimen 12: Clean foil with twin-lobe glare in view 0 and clean view 1 (rotated 90 deg portrait)
     c_12 = create_base_canonical_card(seed=212)
     c_12_v0 = c_12.copy()
-    apply_glare_spot(c_12_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
+    apply_twin_lobe_glare(c_12_v0, center_xy=(1000, 400), radius_x=130)
     c_12_v1 = c_12.copy()
     apply_glare_spot(c_12_v1, center_xy=(750, 250), radius_x=60, radius_y=30)
     c_12_v2 = c_12.copy()
@@ -559,14 +598,14 @@ def generate_specimen_dataset() -> None:
             "defect_subtype": None,
             "true_length_mm": None,
             "gt_bbox_canonical": None,
-            "note": f"{LABEL_DISCLAIMER} - Clean foil; view_1 rotated 90 deg portrait to verify rotation invariance in held-out suite.",
+            "note": f"{LABEL_DISCLAIMER} - Clean foil; twin-lobe glare in view_0, view_1 rotated 90 deg portrait to verify rotation invariance in held-out suite.",
         },
     )
 
     # Specimen 13: Clean foil where view 1 has corrupted/missing Marker 0 (MarkerNotFoundError) and view 2 is valid
     c_13 = create_base_canonical_card(seed=213)
     c_13_v0 = c_13.copy()
-    apply_glare_spot(c_13_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
+    apply_twin_lobe_glare(c_13_v0, center_xy=(1000, 400), radius_x=130)
     c_13_v1 = c_13.copy()  # Will corrupt Marker 0
     c_13_v2 = c_13.copy()
     apply_glare_spot(c_13_v2, center_xy=(750, 250), radius_x=60, radius_y=30)
@@ -581,7 +620,7 @@ def generate_specimen_dataset() -> None:
             "defect_subtype": None,
             "true_length_mm": None,
             "gt_bbox_canonical": None,
-            "note": f"{LABEL_DISCLAIMER} - Clean foil; view_1 has corrupted Marker 0 (MarkerNotFoundError) to test M-03 graceful candidate skip.",
+            "note": f"{LABEL_DISCLAIMER} - Clean foil; twin-lobe glare in view_0, view_1 has corrupted Marker 0 (MarkerNotFoundError) to test M-03 graceful candidate skip.",
         },
     )
 
@@ -594,7 +633,7 @@ def generate_specimen_dataset() -> None:
     )
     cv2.polylines(c_14, [pts], isClosed=False, color=(142, 142, 142), thickness=1)
     c_14_v0 = c_14.copy()
-    apply_glare_spot(c_14_v0, center_xy=(1000, 400), radius_x=120, radius_y=60)
+    apply_twin_lobe_glare(c_14_v0, center_xy=(1000, 400), radius_x=130)
     c_14_v1 = c_14.copy()
     apply_glare_spot(c_14_v1, center_xy=(750, 250), radius_x=60, radius_y=30)
     c_14_v2 = c_14.copy()
@@ -610,7 +649,7 @@ def generate_specimen_dataset() -> None:
             "defect_subtype": None,
             "true_length_mm": None,
             "gt_bbox_canonical": None,
-            "note": f"{LABEL_DISCLAIMER} - Clean foil with shallow handling wrinkle (solidity < 0.25, contrast < 25); tests clean false reject avoidance.",
+            "note": f"{LABEL_DISCLAIMER} - Clean foil with shallow handling wrinkle (solidity < 0.25, contrast < 25); twin-lobe glare in view_0.",
         },
     )
 

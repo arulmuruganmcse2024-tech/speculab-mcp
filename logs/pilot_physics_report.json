@@ -2,7 +2,7 @@
   "view0_path": "assets/pilot/pilot_view_0.jpg",
   "view1_path": "assets/pilot/pilot_view_1.jpg",
   "view0_glare_pct": 9.237,
-  "view1_glare_pct": 4.619,
+  "view1_glare_pct": 5.446,
   "residual_glare_pct": 0.0,
   "zone_metrics_view0": {
     "zone_a_through_hole": {

@@ -59,6 +59,8 @@ report = {
     "instance_type": "$INSTANCE_TYPE",
     "ami_id": "$AMI_ID",
     "architecture": "$ARCH",
+    "machine": "$ARCH",
+    "platform": "Linux-$ARCH",
     "cool_venv_path": "$COOL_VENV" if "$COOL_VENV" else "NONE",
     "cv2_version": cv_ver,
     "cv2_file": cv_file,

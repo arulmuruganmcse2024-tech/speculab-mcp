@@ -10,7 +10,7 @@
   "runs": [
     {
       "label": "opencv5_simd_optimized",
-      "timestamp_iso": "2026-10-26T18:57:52Z",
+      "timestamp_iso": "2026-10-27T03:35:34Z",
       "opencv_runtime": {
         "cv2_version": "5.0.0",
         "cv2_major": 5,
@@ -40,68 +40,68 @@
         "threads": 1,
         "warmup_iterations": 5,
         "timed_iterations": 30,
-        "throughput_fps": 3.95,
-        "peak_rss_mb": 158.48,
+        "throughput_fps": 4.86,
+        "peak_rss_mb": 156.41,
         "stages": {
           "resize_ms": {
-            "mean_ms": 2.206,
-            "std_ms": 0.327,
-            "p50_ms": 2.259,
-            "p95_ms": 2.788
+            "mean_ms": 2.324,
+            "std_ms": 0.967,
+            "p50_ms": 1.818,
+            "p95_ms": 4.392
           },
           "cvt_color_ms": {
-            "mean_ms": 0.478,
-            "std_ms": 0.207,
-            "p50_ms": 0.428,
-            "p95_ms": 0.83
+            "mean_ms": 0.451,
+            "std_ms": 0.188,
+            "p50_ms": 0.396,
+            "p95_ms": 0.797
           },
           "gaussian_blur_ms": {
-            "mean_ms": 0.313,
-            "std_ms": 0.145,
-            "p50_ms": 0.272,
-            "p95_ms": 0.499
+            "mean_ms": 0.322,
+            "std_ms": 0.155,
+            "p50_ms": 0.283,
+            "p95_ms": 0.589
           },
           "aruco_detect_ms": {
-            "mean_ms": 21.422,
-            "std_ms": 3.359,
-            "p50_ms": 20.747,
-            "p95_ms": 22.644
+            "mean_ms": 21.761,
+            "std_ms": 3.237,
+            "p50_ms": 21.427,
+            "p95_ms": 25.972
           },
           "warp_perspective_ms": {
-            "mean_ms": 22.132,
-            "std_ms": 8.293,
-            "p50_ms": 20.166,
-            "p95_ms": 25.556
+            "mean_ms": 21.3,
+            "std_ms": 3.381,
+            "p50_ms": 20.385,
+            "p95_ms": 25.658
           },
           "glare_mask_and_entropy_ms": {
-            "mean_ms": 17.076,
-            "std_ms": 1.37,
-            "p50_ms": 16.975,
-            "p95_ms": 19.418
+            "mean_ms": 14.709,
+            "std_ms": 1.063,
+            "p50_ms": 14.409,
+            "p95_ms": 16.382
           },
           "orb_extract_ms": {
-            "mean_ms": 17.288,
-            "std_ms": 1.945,
-            "p50_ms": 16.737,
-            "p95_ms": 20.907
+            "mean_ms": 15.891,
+            "std_ms": 1.988,
+            "p50_ms": 15.287,
+            "p95_ms": 18.523
           },
           "usac_magsac_ms": {
-            "mean_ms": 146.334,
-            "std_ms": 8.616,
-            "p50_ms": 143.263,
-            "p95_ms": 161.11
+            "mean_ms": 104.763,
+            "std_ms": 2.731,
+            "p50_ms": 104.672,
+            "p95_ms": 108.854
           },
           "detection_morphology_ms": {
-            "mean_ms": 24.28,
-            "std_ms": 2.383,
-            "p50_ms": 23.414,
-            "p95_ms": 29.058
+            "mean_ms": 22.993,
+            "std_ms": 1.366,
+            "p50_ms": 22.87,
+            "p95_ms": 25.613
           },
           "total_pipeline_ms": {
-            "mean_ms": 251.536,
-            "std_ms": 17.481,
-            "p50_ms": 247.449,
-            "p95_ms": 273.391
+            "mean_ms": 204.519,
+            "std_ms": 7.362,
+            "p50_ms": 203.117,
+            "p95_ms": 220.818
           }
         }
       },
@@ -109,75 +109,75 @@
         "threads": 4,
         "warmup_iterations": 5,
         "timed_iterations": 30,
-        "throughput_fps": 5.06,
-        "peak_rss_mb": 167.19,
+        "throughput_fps": 6.28,
+        "peak_rss_mb": 163.56,
         "stages": {
           "resize_ms": {
-            "mean_ms": 1.856,
-            "std_ms": 0.459,
-            "p50_ms": 1.811,
-            "p95_ms": 2.914
+            "mean_ms": 2.067,
+            "std_ms": 0.542,
+            "p50_ms": 1.919,
+            "p95_ms": 2.865
           },
           "cvt_color_ms": {
-            "mean_ms": 0.425,
-            "std_ms": 0.141,
-            "p50_ms": 0.38,
-            "p95_ms": 0.698
+            "mean_ms": 0.503,
+            "std_ms": 0.173,
+            "p50_ms": 0.503,
+            "p95_ms": 0.772
           },
           "gaussian_blur_ms": {
-            "mean_ms": 0.299,
-            "std_ms": 0.127,
-            "p50_ms": 0.277,
-            "p95_ms": 0.523
+            "mean_ms": 0.349,
+            "std_ms": 0.161,
+            "p50_ms": 0.309,
+            "p95_ms": 0.534
           },
           "aruco_detect_ms": {
-            "mean_ms": 13.224,
-            "std_ms": 1.9,
-            "p50_ms": 12.516,
-            "p95_ms": 16.831
+            "mean_ms": 12.553,
+            "std_ms": 1.677,
+            "p50_ms": 12.19,
+            "p95_ms": 14.505
           },
           "warp_perspective_ms": {
-            "mean_ms": 12.695,
-            "std_ms": 2.108,
-            "p50_ms": 12.201,
-            "p95_ms": 15.824
+            "mean_ms": 12.179,
+            "std_ms": 0.971,
+            "p50_ms": 12.115,
+            "p95_ms": 13.532
           },
           "glare_mask_and_entropy_ms": {
-            "mean_ms": 16.018,
-            "std_ms": 2.677,
-            "p50_ms": 15.427,
-            "p95_ms": 18.785
+            "mean_ms": 13.152,
+            "std_ms": 0.986,
+            "p50_ms": 13.226,
+            "p95_ms": 14.481
           },
           "orb_extract_ms": {
-            "mean_ms": 16.299,
-            "std_ms": 1.006,
-            "p50_ms": 16.147,
-            "p95_ms": 18.117
+            "mean_ms": 16.985,
+            "std_ms": 1.571,
+            "p50_ms": 16.657,
+            "p95_ms": 18.69
           },
           "usac_magsac_ms": {
-            "mean_ms": 111.729,
-            "std_ms": 10.444,
-            "p50_ms": 109.296,
-            "p95_ms": 132.068
+            "mean_ms": 77.413,
+            "std_ms": 5.676,
+            "p50_ms": 76.498,
+            "p95_ms": 88.667
           },
           "detection_morphology_ms": {
-            "mean_ms": 23.52,
-            "std_ms": 3.865,
-            "p50_ms": 22.426,
-            "p95_ms": 26.022
+            "mean_ms": 22.717,
+            "std_ms": 4.581,
+            "p50_ms": 21.656,
+            "p95_ms": 24.299
           },
           "total_pipeline_ms": {
-            "mean_ms": 196.076,
-            "std_ms": 16.985,
-            "p50_ms": 189.903,
-            "p95_ms": 227.318
+            "mean_ms": 157.926,
+            "std_ms": 9.429,
+            "p50_ms": 154.852,
+            "p95_ms": 177.361
           }
         }
       }
     },
     {
       "label": "opencv5_unoptimized_baseline",
-      "timestamp_iso": "2026-10-26T18:58:18Z",
+      "timestamp_iso": "2026-10-27T03:35:56Z",
       "opencv_runtime": {
         "cv2_version": "5.0.0",
         "cv2_major": 5,
@@ -207,68 +207,68 @@
         "threads": 1,
         "warmup_iterations": 5,
         "timed_iterations": 30,
-        "throughput_fps": 3.69,
-        "peak_rss_mb": 117.63,
+        "throughput_fps": 4.19,
+        "peak_rss_mb": 114.28,
         "stages": {
           "resize_ms": {
-            "mean_ms": 2.604,
-            "std_ms": 0.688,
-            "p50_ms": 2.334,
-            "p95_ms": 3.969
+            "mean_ms": 2.411,
+            "std_ms": 0.403,
+            "p50_ms": 2.332,
+            "p95_ms": 3.146
           },
           "cvt_color_ms": {
-            "mean_ms": 0.66,
-            "std_ms": 0.2,
-            "p50_ms": 0.61,
-            "p95_ms": 1.001
+            "mean_ms": 0.954,
+            "std_ms": 1.59,
+            "p50_ms": 0.626,
+            "p95_ms": 1.191
           },
           "gaussian_blur_ms": {
-            "mean_ms": 0.333,
-            "std_ms": 0.077,
-            "p50_ms": 0.319,
-            "p95_ms": 0.394
+            "mean_ms": 0.385,
+            "std_ms": 0.169,
+            "p50_ms": 0.321,
+            "p95_ms": 0.647
           },
           "aruco_detect_ms": {
-            "mean_ms": 25.091,
-            "std_ms": 1.682,
-            "p50_ms": 24.802,
-            "p95_ms": 27.985
+            "mean_ms": 25.683,
+            "std_ms": 7.556,
+            "p50_ms": 24.72,
+            "p95_ms": 26.568
           },
           "warp_perspective_ms": {
-            "mean_ms": 25.033,
-            "std_ms": 2.075,
-            "p50_ms": 24.784,
-            "p95_ms": 28.079
+            "mean_ms": 24.935,
+            "std_ms": 2.215,
+            "p50_ms": 24.448,
+            "p95_ms": 27.908
           },
           "glare_mask_and_entropy_ms": {
-            "mean_ms": 17.512,
-            "std_ms": 1.41,
-            "p50_ms": 17.181,
-            "p95_ms": 20.014
+            "mean_ms": 15.803,
+            "std_ms": 1.776,
+            "p50_ms": 15.595,
+            "p95_ms": 19.091
           },
           "orb_extract_ms": {
-            "mean_ms": 20.688,
-            "std_ms": 1.551,
-            "p50_ms": 20.273,
-            "p95_ms": 23.639
+            "mean_ms": 20.668,
+            "std_ms": 1.025,
+            "p50_ms": 20.364,
+            "p95_ms": 22.31
           },
           "usac_magsac_ms": {
-            "mean_ms": 155.99,
-            "std_ms": 5.649,
-            "p50_ms": 154.631,
-            "p95_ms": 165.284
+            "mean_ms": 125.072,
+            "std_ms": 4.925,
+            "p50_ms": 124.264,
+            "p95_ms": 133.107
           },
           "detection_morphology_ms": {
-            "mean_ms": 22.064,
-            "std_ms": 1.819,
-            "p50_ms": 22.151,
-            "p95_ms": 25.049
+            "mean_ms": 21.53,
+            "std_ms": 0.957,
+            "p50_ms": 21.373,
+            "p95_ms": 23.285
           },
           "total_pipeline_ms": {
-            "mean_ms": 269.981,
-            "std_ms": 7.816,
-            "p50_ms": 268.545,
-            "p95_ms": 285.73
+            "mean_ms": 237.447,
+            "std_ms": 12.039,
+            "p50_ms": 235.022,
+            "p95_ms": 248.848
           }
         }
       },
@@ -276,75 +276,75 @@
         "threads": 4,
         "warmup_iterations": 5,
         "timed_iterations": 30,
-        "throughput_fps": 4.89,
-        "peak_rss_mb": 123.8,
+        "throughput_fps": 5.91,
+        "peak_rss_mb": 121.05,
         "stages": {
           "resize_ms": {
-            "mean_ms": 1.749,
-            "std_ms": 0.232,
-            "p50_ms": 1.8,
-            "p95_ms": 2.069
+            "mean_ms": 1.896,
+            "std_ms": 0.362,
+            "p50_ms": 1.756,
+            "p95_ms": 2.577
           },
           "cvt_color_ms": {
-            "mean_ms": 0.444,
-            "std_ms": 0.13,
-            "p50_ms": 0.409,
-            "p95_ms": 0.69
+            "mean_ms": 0.526,
+            "std_ms": 0.133,
+            "p50_ms": 0.477,
+            "p95_ms": 0.79
           },
           "gaussian_blur_ms": {
-            "mean_ms": 0.321,
-            "std_ms": 0.125,
-            "p50_ms": 0.284,
-            "p95_ms": 0.552
+            "mean_ms": 0.349,
+            "std_ms": 0.142,
+            "p50_ms": 0.308,
+            "p95_ms": 0.597
           },
           "aruco_detect_ms": {
-            "mean_ms": 13.425,
-            "std_ms": 1.147,
-            "p50_ms": 13.255,
-            "p95_ms": 15.246
+            "mean_ms": 13.26,
+            "std_ms": 1.345,
+            "p50_ms": 12.828,
+            "p95_ms": 15.601
           },
           "warp_perspective_ms": {
-            "mean_ms": 12.477,
-            "std_ms": 0.849,
-            "p50_ms": 12.497,
-            "p95_ms": 13.536
+            "mean_ms": 12.397,
+            "std_ms": 1.074,
+            "p50_ms": 12.108,
+            "p95_ms": 14.208
           },
           "glare_mask_and_entropy_ms": {
-            "mean_ms": 15.654,
-            "std_ms": 1.985,
-            "p50_ms": 15.388,
-            "p95_ms": 18.089
+            "mean_ms": 13.132,
+            "std_ms": 0.994,
+            "p50_ms": 13.159,
+            "p95_ms": 14.564
           },
           "orb_extract_ms": {
-            "mean_ms": 19.485,
-            "std_ms": 1.631,
-            "p50_ms": 18.987,
-            "p95_ms": 23.047
+            "mean_ms": 19.066,
+            "std_ms": 2.084,
+            "p50_ms": 18.455,
+            "p95_ms": 22.664
           },
           "usac_magsac_ms": {
-            "mean_ms": 116.625,
-            "std_ms": 7.035,
-            "p50_ms": 114.445,
-            "p95_ms": 130.702
+            "mean_ms": 84.862,
+            "std_ms": 5.19,
+            "p50_ms": 83.157,
+            "p95_ms": 95.754
           },
           "detection_morphology_ms": {
-            "mean_ms": 22.706,
-            "std_ms": 1.874,
-            "p50_ms": 22.186,
-            "p95_ms": 25.945
+            "mean_ms": 22.124,
+            "std_ms": 0.941,
+            "p50_ms": 21.85,
+            "p95_ms": 23.944
           },
           "total_pipeline_ms": {
-            "mean_ms": 202.893,
-            "std_ms": 10.174,
-            "p50_ms": 198.098,
-            "p95_ms": 223.873
+            "mean_ms": 167.621,
+            "std_ms": 8.874,
+            "p50_ms": 165.201,
+            "p95_ms": 182.82
           }
         }
       }
     }
   ],
   "markdown_tables": {
-    "table_1thread": "| Inspection Stage | opencv5_simd_optimized | opencv5_unoptimized_baseline | Speedup (opencv5_simd_optimized vs opencv5_unoptimized_baseline) |\n| --- | --- | --- | --- |\n| cv2.resize (1280 proxy) | 2.21 +/- 0.33 ms | 2.60 +/- 0.69 ms | 1.18x faster (-15.3% latency) |\n| cv2.cvtColor (BGR->GRAY) | 0.48 +/- 0.21 ms | 0.66 +/- 0.20 ms | 1.38x faster (-27.6% latency) |\n| cv2.GaussianBlur (3x3) | 0.31 +/- 0.14 ms | 0.33 +/- 0.08 ms | 1.06x (Parity / Within Noise) |\n| ArUco Detect & Metric | 21.42 +/- 3.36 ms | 25.09 +/- 1.68 ms | 1.17x faster (-14.6% latency) |\n| cv2.warpPerspective (2000x800) | 22.13 +/- 8.29 ms | 25.03 +/- 2.08 ms | 1.13x (Parity / Within Noise) |\n| Hysteresis Glare & Entropy | 17.08 +/- 1.37 ms | 17.51 +/- 1.41 ms | 1.03x (Parity / Within Noise) |\n| ORB Feature Extraction | 17.29 +/- 1.95 ms | 20.69 +/- 1.55 ms | 1.20x faster (-16.4% latency) |\n| USAC_MAGSAC & Fusion | 146.33 +/- 8.62 ms | 155.99 +/- 5.65 ms | 1.07x faster (-6.2% latency) |\n| BLACKHAT 61x61 Denoised | 24.28 +/- 2.38 ms | 22.06 +/- 1.82 ms | 0.91x slower (+10.0% latency) |\n| Total Pipeline Inspection | 251.54 +/- 17.48 ms | 269.98 +/- 7.82 ms | 1.07x faster (-6.8% latency) |\n| Throughput (FPS) | 4.0 fps | 3.7 fps | 1.07x throughput |\n| Peak RSS Memory (MB) | 158.5 MB | 117.6 MB | +40.8 MB delta |",
-    "table_nthread": "| Inspection Stage | opencv5_simd_optimized | opencv5_unoptimized_baseline | Speedup (opencv5_simd_optimized vs opencv5_unoptimized_baseline) |\n| --- | --- | --- | --- |\n| cv2.resize (1280 proxy) | 1.86 +/- 0.46 ms | 1.75 +/- 0.23 ms | 0.94x (Parity / Within Noise) |\n| cv2.cvtColor (BGR->GRAY) | 0.42 +/- 0.14 ms | 0.44 +/- 0.13 ms | 1.04x (Parity / Within Noise) |\n| cv2.GaussianBlur (3x3) | 0.30 +/- 0.13 ms | 0.32 +/- 0.12 ms | 1.07x (Parity / Within Noise) |\n| ArUco Detect & Metric | 13.22 +/- 1.90 ms | 13.43 +/- 1.15 ms | 1.02x (Parity / Within Noise) |\n| cv2.warpPerspective (2000x800) | 12.70 +/- 2.11 ms | 12.48 +/- 0.85 ms | 0.98x (Parity / Within Noise) |\n| Hysteresis Glare & Entropy | 16.02 +/- 2.68 ms | 15.65 +/- 1.99 ms | 0.98x (Parity / Within Noise) |\n| ORB Feature Extraction | 16.30 +/- 1.01 ms | 19.48 +/- 1.63 ms | 1.20x faster (-16.4% latency) |\n| USAC_MAGSAC & Fusion | 111.73 +/- 10.44 ms | 116.62 +/- 7.04 ms | 1.04x faster (-4.2% latency) |\n| BLACKHAT 61x61 Denoised | 23.52 +/- 3.87 ms | 22.71 +/- 1.87 ms | 0.97x (Parity / Within Noise) |\n| Total Pipeline Inspection | 196.08 +/- 16.98 ms | 202.89 +/- 10.17 ms | 1.03x (Parity / Within Noise) |\n| Throughput (FPS) | 5.1 fps | 4.9 fps | 1.03x throughput |\n| Peak RSS Memory (MB) | 167.2 MB | 123.8 MB | +43.4 MB delta |"
+    "table_1thread": "| Inspection Stage | opencv5_simd_optimized | opencv5_unoptimized_baseline | Speedup (opencv5_simd_optimized vs opencv5_unoptimized_baseline) |\n| --- | --- | --- | --- |\n| cv2.resize (1280 proxy) | 2.32 +/- 0.97 ms | 2.41 +/- 0.40 ms | 1.04x (Parity / Within Noise) |\n| cv2.cvtColor (BGR->GRAY) | 0.45 +/- 0.19 ms | 0.95 +/- 1.59 ms | 2.12x (Parity / Within Noise) |\n| cv2.GaussianBlur (3x3) | 0.32 +/- 0.15 ms | 0.39 +/- 0.17 ms | 1.20x (Parity / Within Noise) |\n| ArUco Detect & Metric | 21.76 +/- 3.24 ms | 25.68 +/- 7.56 ms | 1.18x faster (-15.3% latency) |\n| cv2.warpPerspective (2000x800) | 21.30 +/- 3.38 ms | 24.93 +/- 2.21 ms | 1.17x faster (-14.6% latency) |\n| Hysteresis Glare & Entropy | 14.71 +/- 1.06 ms | 15.80 +/- 1.78 ms | 1.07x faster (-6.9% latency) |\n| ORB Feature Extraction | 15.89 +/- 1.99 ms | 20.67 +/- 1.02 ms | 1.30x faster (-23.1% latency) |\n| USAC_MAGSAC & Fusion | 104.76 +/- 2.73 ms | 125.07 +/- 4.92 ms | 1.19x faster (-16.2% latency) |\n| BLACKHAT 61x61 Denoised | 22.99 +/- 1.37 ms | 21.53 +/- 0.96 ms | 0.94x slower (+6.8% latency) |\n| Total Pipeline Inspection | 204.52 +/- 7.36 ms | 237.45 +/- 12.04 ms | 1.16x faster (-13.9% latency) |\n| Throughput (FPS) | 4.9 fps | 4.2 fps | 1.16x throughput |\n| Peak RSS Memory (MB) | 156.4 MB | 114.3 MB | +42.1 MB delta |",
+    "table_nthread": "| Inspection Stage | opencv5_simd_optimized | opencv5_unoptimized_baseline | Speedup (opencv5_simd_optimized vs opencv5_unoptimized_baseline) |\n| --- | --- | --- | --- |\n| cv2.resize (1280 proxy) | 2.07 +/- 0.54 ms | 1.90 +/- 0.36 ms | 0.92x (Parity / Within Noise) |\n| cv2.cvtColor (BGR->GRAY) | 0.50 +/- 0.17 ms | 0.53 +/- 0.13 ms | 1.05x (Parity / Within Noise) |\n| cv2.GaussianBlur (3x3) | 0.35 +/- 0.16 ms | 0.35 +/- 0.14 ms | 1.00x (Parity / Within Noise) |\n| ArUco Detect & Metric | 12.55 +/- 1.68 ms | 13.26 +/- 1.34 ms | 1.06x (Parity / Within Noise) |\n| cv2.warpPerspective (2000x800) | 12.18 +/- 0.97 ms | 12.40 +/- 1.07 ms | 1.02x (Parity / Within Noise) |\n| Hysteresis Glare & Entropy | 13.15 +/- 0.99 ms | 13.13 +/- 0.99 ms | 1.00x (Parity / Within Noise) |\n| ORB Feature Extraction | 16.98 +/- 1.57 ms | 19.07 +/- 2.08 ms | 1.12x faster (-10.9% latency) |\n| USAC_MAGSAC & Fusion | 77.41 +/- 5.68 ms | 84.86 +/- 5.19 ms | 1.10x faster (-8.8% latency) |\n| BLACKHAT 61x61 Denoised | 22.72 +/- 4.58 ms | 22.12 +/- 0.94 ms | 0.97x (Parity / Within Noise) |\n| Total Pipeline Inspection | 157.93 +/- 9.43 ms | 167.62 +/- 8.87 ms | 1.06x faster (-5.8% latency) |\n| Throughput (FPS) | 6.3 fps | 5.9 fps | 1.06x throughput |\n| Peak RSS Memory (MB) | 163.6 MB | 121.0 MB | +42.5 MB delta |"
   }
 }

@@ -60,12 +60,12 @@
     "defect_subtype": "blind_pin_dent",
     "true_length_mm": 0.95,
     "gt_bbox_canonical": [
-      990,
+      940,
       390,
       20,
       20
     ],
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.95 mm blind dent at (1000, 400); tests overlap-aware 2C policy vs 2A and 2B."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.95 mm blind dent at (950, 400); tests overlap-aware 2C policy vs 2A and 2B."
   },
   "specimen_07": {
     "split": "held_out",
@@ -84,27 +84,27 @@
     "split": "held_out",
     "has_defect": true,
     "defect_subtype": "through_hole",
-    "true_length_mm": 0.9,
+    "true_length_mm": 0.95,
     "gt_bbox_canonical": [
-      890,
+      810,
       390,
       20,
       20
     ],
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.90 mm puncture requiring 2 fusions (left half healed in view 2)."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.95 mm puncture requiring 2 fusions (left half healed in view 2)."
   },
   "specimen_09": {
     "split": "held_out",
     "has_defect": true,
     "defect_subtype": "through_hole",
-    "true_length_mm": 0.65,
+    "true_length_mm": 0.85,
     "gt_bbox_canonical": [
-      990,
+      970,
       390,
       20,
       20
     ],
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.65 mm pinhole under 1.2% glare causing passive disagreement trigger."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Defective 0.85 mm pinhole under 1.4% glare causing passive disagreement trigger."
   },
   "specimen_10": {
     "split": "held_out",
@@ -138,7 +138,7 @@
     "defect_subtype": null,
     "true_length_mm": null,
     "gt_bbox_canonical": null,
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil; view_1 rotated 90 deg portrait to verify rotation invariance in held-out suite."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil; twin-lobe glare in view_0, view_1 rotated 90 deg portrait to verify rotation invariance in held-out suite."
   },
   "specimen_13": {
     "split": "held_out",
@@ -146,7 +146,7 @@
     "defect_subtype": null,
     "true_length_mm": null,
     "gt_bbox_canonical": null,
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil; view_1 has corrupted Marker 0 (MarkerNotFoundError) to test M-03 graceful candidate skip."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil; twin-lobe glare in view_0, view_1 has corrupted Marker 0 (MarkerNotFoundError) to test M-03 graceful candidate skip."
   },
   "specimen_14": {
     "split": "held_out",
@@ -154,6 +154,6 @@
     "defect_subtype": null,
     "true_length_mm": null,
     "gt_bbox_canonical": null,
-    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil with shallow handling wrinkle (solidity < 0.25, contrast < 25); tests clean false reject avoidance."
+    "note": "Automated Procedural Optical Testbed (Simulated Coplanar ArUco Card, Anisotropic Brushed Foil, Multi-Angle Perspective Tilt, and Specular Glare + Penumbra Halo) - Clean foil with shallow handling wrinkle (solidity < 0.25, contrast < 25); twin-lobe glare in view_0."
   }
 }

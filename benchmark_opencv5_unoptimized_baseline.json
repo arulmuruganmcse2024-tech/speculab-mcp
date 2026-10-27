@@ -1,6 +1,6 @@
 {
   "label": "opencv5_unoptimized_baseline",
-  "timestamp_iso": "2026-10-26T18:58:18Z",
+  "timestamp_iso": "2026-10-27T03:35:56Z",
   "opencv_runtime": {
     "cv2_version": "5.0.0",
     "cv2_major": 5,
@@ -30,68 +30,68 @@
     "threads": 1,
     "warmup_iterations": 5,
     "timed_iterations": 30,
-    "throughput_fps": 3.69,
-    "peak_rss_mb": 117.63,
+    "throughput_fps": 4.19,
+    "peak_rss_mb": 114.28,
     "stages": {
       "resize_ms": {
-        "mean_ms": 2.604,
-        "std_ms": 0.688,
-        "p50_ms": 2.334,
-        "p95_ms": 3.969
+        "mean_ms": 2.411,
+        "std_ms": 0.403,
+        "p50_ms": 2.332,
+        "p95_ms": 3.146
       },
       "cvt_color_ms": {
-        "mean_ms": 0.66,
-        "std_ms": 0.2,
-        "p50_ms": 0.61,
-        "p95_ms": 1.001
+        "mean_ms": 0.954,
+        "std_ms": 1.59,
+        "p50_ms": 0.626,
+        "p95_ms": 1.191
       },
       "gaussian_blur_ms": {
-        "mean_ms": 0.333,
-        "std_ms": 0.077,
-        "p50_ms": 0.319,
-        "p95_ms": 0.394
+        "mean_ms": 0.385,
+        "std_ms": 0.169,
+        "p50_ms": 0.321,
+        "p95_ms": 0.647
       },
       "aruco_detect_ms": {
-        "mean_ms": 25.091,
-        "std_ms": 1.682,
-        "p50_ms": 24.802,
-        "p95_ms": 27.985
+        "mean_ms": 25.683,
+        "std_ms": 7.556,
+        "p50_ms": 24.72,
+        "p95_ms": 26.568
       },
       "warp_perspective_ms": {
-        "mean_ms": 25.033,
-        "std_ms": 2.075,
-        "p50_ms": 24.784,
-        "p95_ms": 28.079
+        "mean_ms": 24.935,
+        "std_ms": 2.215,
+        "p50_ms": 24.448,
+        "p95_ms": 27.908
       },
       "glare_mask_and_entropy_ms": {
-        "mean_ms": 17.512,
-        "std_ms": 1.41,
-        "p50_ms": 17.181,
-        "p95_ms": 20.014
+        "mean_ms": 15.803,
+        "std_ms": 1.776,
+        "p50_ms": 15.595,
+        "p95_ms": 19.091
       },
       "orb_extract_ms": {
-        "mean_ms": 20.688,
-        "std_ms": 1.551,
-        "p50_ms": 20.273,
-        "p95_ms": 23.639
+        "mean_ms": 20.668,
+        "std_ms": 1.025,
+        "p50_ms": 20.364,
+        "p95_ms": 22.31
       },
       "usac_magsac_ms": {
-        "mean_ms": 155.99,
-        "std_ms": 5.649,
-        "p50_ms": 154.631,
-        "p95_ms": 165.284
+        "mean_ms": 125.072,
+        "std_ms": 4.925,
+        "p50_ms": 124.264,
+        "p95_ms": 133.107
       },
       "detection_morphology_ms": {
-        "mean_ms": 22.064,
-        "std_ms": 1.819,
-        "p50_ms": 22.151,
-        "p95_ms": 25.049
+        "mean_ms": 21.53,
+        "std_ms": 0.957,
+        "p50_ms": 21.373,
+        "p95_ms": 23.285
       },
       "total_pipeline_ms": {
-        "mean_ms": 269.981,
-        "std_ms": 7.816,
-        "p50_ms": 268.545,
-        "p95_ms": 285.73
+        "mean_ms": 237.447,
+        "std_ms": 12.039,
+        "p50_ms": 235.022,
+        "p95_ms": 248.848
       }
     }
   },
@@ -99,68 +99,68 @@
     "threads": 4,
     "warmup_iterations": 5,
     "timed_iterations": 30,
-    "throughput_fps": 4.89,
-    "peak_rss_mb": 123.8,
+    "throughput_fps": 5.91,
+    "peak_rss_mb": 121.05,
     "stages": {
       "resize_ms": {
-        "mean_ms": 1.749,
-        "std_ms": 0.232,
-        "p50_ms": 1.8,
-        "p95_ms": 2.069
+        "mean_ms": 1.896,
+        "std_ms": 0.362,
+        "p50_ms": 1.756,
+        "p95_ms": 2.577
       },
       "cvt_color_ms": {
-        "mean_ms": 0.444,
-        "std_ms": 0.13,
-        "p50_ms": 0.409,
-        "p95_ms": 0.69
+        "mean_ms": 0.526,
+        "std_ms": 0.133,
+        "p50_ms": 0.477,
+        "p95_ms": 0.79
       },
       "gaussian_blur_ms": {
-        "mean_ms": 0.321,
-        "std_ms": 0.125,
-        "p50_ms": 0.284,
-        "p95_ms": 0.552
+        "mean_ms": 0.349,
+        "std_ms": 0.142,
+        "p50_ms": 0.308,
+        "p95_ms": 0.597
       },
       "aruco_detect_ms": {
-        "mean_ms": 13.425,
-        "std_ms": 1.147,
-        "p50_ms": 13.255,
-        "p95_ms": 15.246
+        "mean_ms": 13.26,
+        "std_ms": 1.345,
+        "p50_ms": 12.828,
+        "p95_ms": 15.601
       },
       "warp_perspective_ms": {
-        "mean_ms": 12.477,
-        "std_ms": 0.849,
-        "p50_ms": 12.497,
-        "p95_ms": 13.536
+        "mean_ms": 12.397,
+        "std_ms": 1.074,
+        "p50_ms": 12.108,
+        "p95_ms": 14.208
       },
       "glare_mask_and_entropy_ms": {
-        "mean_ms": 15.654,
-        "std_ms": 1.985,
-        "p50_ms": 15.388,
-        "p95_ms": 18.089
+        "mean_ms": 13.132,
+        "std_ms": 0.994,
+        "p50_ms": 13.159,
+        "p95_ms": 14.564
       },
       "orb_extract_ms": {
-        "mean_ms": 19.485,
-        "std_ms": 1.631,
-        "p50_ms": 18.987,
-        "p95_ms": 23.047
+        "mean_ms": 19.066,
+        "std_ms": 2.084,
+        "p50_ms": 18.455,
+        "p95_ms": 22.664
       },
       "usac_magsac_ms": {
-        "mean_ms": 116.625,
-        "std_ms": 7.035,
-        "p50_ms": 114.445,
-        "p95_ms": 130.702
+        "mean_ms": 84.862,
+        "std_ms": 5.19,
+        "p50_ms": 83.157,
+        "p95_ms": 95.754
       },
       "detection_morphology_ms": {
-        "mean_ms": 22.706,
-        "std_ms": 1.874,
-        "p50_ms": 22.186,
-        "p95_ms": 25.945
+        "mean_ms": 22.124,
+        "std_ms": 0.941,
+        "p50_ms": 21.85,
+        "p95_ms": 23.944
       },
       "total_pipeline_ms": {
-        "mean_ms": 202.893,
-        "std_ms": 10.174,
-        "p50_ms": 198.098,
-        "p95_ms": 223.873
+        "mean_ms": 167.621,
+        "std_ms": 8.874,
+        "p50_ms": 165.201,
+        "p95_ms": 182.82
       }
     }
   }
