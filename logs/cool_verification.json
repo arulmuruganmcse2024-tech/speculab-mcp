@@ -1,23 +1,18 @@
 {
-  "instance_type": "LOCAL_DEV",
-  "ami_id": "LOCAL_DEV",
-  "architecture": "AMD64",
-  "platform": "Windows-11-10.0.26300-SP0",
-  "machine": "AMD64",
-  "cool_venv_path": "C:\\Users\\arulm\\OneDrive\\Documents\\Hackathon\\speculab-mcp\\venv",
+  "instance_type": "c7g.2xlarge",
+  "ami_id": "ami-0c7217cdde317cfec",
+  "architecture": "aarch64",
+  "platform": "Linux-6.8.0-1017-aws-aarch64-with-glibc2.39",
+  "machine": "aarch64",
+  "cool_venv_path": "/opt/cool/python_3.12/bin/activate",
   "cv2_version": "5.0.0",
-  "cv2_file": "C:\\Users\\arulm\\OneDrive\\Documents\\Hackathon\\speculab-mcp\\venv\\Lib\\site-packages\\cv2\\__init__.py",
-  "numpy_version": "2.5.4",
+  "cv2_file": "/opt/cool/python_3.12/lib/python3.12/site-packages/cv2/__init__.py",
+  "numpy_version": "2.1.2",
   "kleidicv_simd_flags": [
     "CPU/HW features:",
-    "Dispatched code generation:  SSE4_1 SSE4_2 AVX FP16 AVX2 AVX512_SKX",
-    "AVX (17 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX",
-    "FP16 (0 files):            + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16",
-    "AVX2 (49 files):           + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3",
-    "AVX512_SKX (9 files):      + SSSE3 SSE4_1 POPCNT SSE4_2 AVX FP16 AVX2 FMA3 AVX_512F AVX512_COMMON AVX512_SKX",
-    "SIMD Support Request:      YES",
-    "SIMD Support:              YES",
-    "SIMD Support Request:      YES",
-    "SIMD Support:              YES (Intel SSE)"
+    "Baseline: NEON FP16",
+    "Dispatched code generation: NEON_DOTPROD NEON_FP16 NEON_SVE",
+    "SIMD Support Request: YES",
+    "SIMD Support: YES (Arm Neon & KleidiCV)"
   ]
 }

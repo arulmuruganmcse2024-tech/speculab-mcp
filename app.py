@@ -395,7 +395,7 @@ def main():
     with st.sidebar.expander("Judge / VIP Access"):
         judge_passcode = st.text_input("VIP Judge Passcode", type="password")
 
-    tab1, tab2 = st.tabs(["🚀 Live Active Inspection & Studio", "📊 Hardware Benchmarks & Micro-Profiling"])
+    tab1, tab2 = st.tabs(["🚀 Live Active Inspection & Studio", "📋 60-Second Judge Quick-Verify & Benchmarks"])
 
     with tab1:
         if not candidate_views:
@@ -568,7 +568,7 @@ def main():
                 st.markdown('<div class="active-healed-container">', unsafe_allow_html=True)
                 st.image(
                     cv2.cvtColor(res["annotated_active"], cv2.COLOR_BGR2RGB),
-                    caption=f"Status: {act.get('status')} | Verdict: {act.get('verdict')} | Fusions: {act.get('view_attempts_used', 0)}/2",
+                    caption=f"Status: {act.get('status')} | Verdict: {act.get('verdict')} | Views Fused: {act.get('view_attempts_used', 0)}/2",
                     use_column_width=True,
                 )
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -681,11 +681,21 @@ def main():
             st.write("")
 
             # Human-in-the-Loop Quarantine Approval
-            if act.get("requires_human_approval") or act.get("verdict") == "REJECT":
-                st.warning("⚠️ High-Risk Defect or Occlusion detected. Requires Human Supervisor Approval.")
-                supervisor_name = st.text_input("Supervisor Name / Badge ID", key="sup_id")
-                approval_reason = st.text_area("Quarantine Override / Disposition Note", key="sup_note")
-                if st.button("🔒 Approve Quarantine & Log to AWS CloudWatch"):
+            is_quarantine = (
+                act.get("requires_human_approval")
+                or act.get("verdict") == "REJECT"
+                or "ESCALATE" in str(act.get("verdict", ""))
+            )
+            if is_quarantine:
+                esc_tag = " (ESCALATE_UNRESOLVED_OCCLUSION)" if "ESCALATE" in str(act.get("verdict", "")) else ""
+                st.warning(f"⚠️ High-Risk Defect or Occlusion detected{esc_tag}. Requires Human Supervisor Approval.")
+                supervisor_name = st.text_input("Supervisor Name / Badge ID", value="SUPERVISOR-042", key="sup_id")
+                approval_reason = st.text_area(
+                    "Quarantine Override / Disposition Note",
+                    value="Confirmed defect/occlusion threshold breach; routing specimen to secondary optical review.",
+                    key="sup_note",
+                )
+                if st.button("🔒 Confirm Quarantine & Log to AWS CloudWatch"):
                     event = {
                         "event_type": "HUMAN_SUPERVISOR_QUARANTINE_DISPOSITION",
                         "supervisor": supervisor_name,
@@ -696,18 +706,49 @@ def main():
                     }
                     agent.audit_logger.log_approval_event(event)
                     st.success("✅ Quarantine event logged to CloudWatch Log Group /aws/opencv2026/speculab-mcp and logs/audit_events.jsonl")
+                    st.session_state["quarantine_logged"] = True
+
+            if st.session_state.get("quarantine_logged") or os.path.exists("logs/audit_events.jsonl"):
+                if os.path.exists("logs/audit_events.jsonl"):
+                    with open("logs/audit_events.jsonl", "r", encoding="utf-8") as f:
+                        audit_lines = [json.loads(line) for line in f if line.strip()]
+                    if audit_lines:
+                        st.markdown("#### 🛡️ CloudWatch Audit Events Ledger")
+                        st.dataframe(audit_lines[-5:], use_container_width=True)
 
             with st.expander("🔍 View Raw Agent Execution Trace & Telemetry"):
                 st.json(res["llm_telemetry"])
                 st.json(res["trace"])
 
     with tab2:
-        st.header("Hardware Benchmarks & Micro-Profiling")
+        st.header("60-Second Judge Quick-Verify & Benchmarks")
+
+        # 1. 6-Method Held-Out Evaluation Table
+        st.subheader("1. 6-Method Held-Out Evaluation Benchmark")
+        st.caption("Empirical defect recall and safety capture across held-out procedural specimens.")
+        if os.path.exists("evaluation_report.json"):
+            with open("evaluation_report.json", "r", encoding="utf-8") as f:
+                eval_rep = json.load(f)
+            methods = eval_rep.get("held_out_methods", {})
+            md_lines = [
+                "| Inspection Method | Strict Recall | Safety Capture (incl. Esc) | Clean False Rejects | Unresolved Occlusions |",
+                "| --- | --- | --- | --- | --- |",
+            ]
+            for mkey, mdata in methods.items():
+                md_lines.append(
+                    f"| `{mkey}` | {mdata.get('strict_defect_recall', 'N/A')} | "
+                    f"{mdata.get('safety_capture_rate_incl_escalation', 'N/A')} | "
+                    f"{mdata.get('clean_false_rejects', 'N/A')} | "
+                    f"{mdata.get('unresolved_occlusion_flagged', 'N/A')} |"
+                )
+            st.markdown("\n".join(md_lines))
+
+        st.divider()
 
         # -------------------------------------------------------------
         # Animated Interactive Plotly Charts for Benchmarks (Req 2)
         # -------------------------------------------------------------
-        st.subheader("1. Authentic Hardware Execution Benchmarks (OpenCV Baseline vs SIMD)")
+        st.subheader("2. Authentic Hardware Execution Benchmarks (OpenCV Baseline vs SIMD)")
         st.caption("Measured on AWS Graviton / x86_64 runners across authentic multi-view pipeline cycles.")
 
         if os.path.exists("benchmark_comparison.json"):
@@ -788,7 +829,17 @@ def main():
 
         st.divider()
 
-        st.subheader("2. System Artifacts & Cryptographic Checksums")
+        st.subheader("3. AWS COOL Graviton Verification Log (`cool_verification.json`)")
+        st.caption("Hardware architecture and SIMD dispatch confirmation on AWS Graviton / ARM64 Neoverse.")
+        if os.path.exists("logs/cool_verification.json"):
+            with open("logs/cool_verification.json", "r", encoding="utf-8") as f:
+                st.json(json.load(f))
+        else:
+            st.info("ℹ️ logs/cool_verification.json not found.")
+
+        st.divider()
+
+        st.subheader("4. System Artifacts & Cryptographic Checksums")
         tracked_files = [
             "config.yaml",
             "assets/printable_test_card.png",
@@ -807,7 +858,7 @@ def main():
             )
         st.table(file_records)
 
-        st.subheader("3. Runtime Environment & OpenCV Build Information")
+        st.subheader("5. Runtime Environment & OpenCV Build Information")
         st.json(runtime_meta)
 
 
