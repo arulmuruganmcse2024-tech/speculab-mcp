@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpecuLab-MCP: Autonomous Active Vision Metrology for Metallic Foils</title>
+  <meta name="description" content="Eliminating specular glare occlusions on metallic foils through autonomous multi-view active vision with OpenCV 5.0.0, AWS Graviton (Arm KleidiCV), and Model Context Protocol (FastMCP).">
+  
+  <!-- OpenGraph Metadata -->
+  <meta property="og:title" content="SpecuLab-MCP: Autonomous Active Vision Metrology">
+  <meta property="og:description" content="Overcoming specular reflection barriers on shiny blister foils using OpenCV 5.0.0, Arm KleidiCV, and AWS Bedrock Agentic FastMCP.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://arulmuruganmcse2024-tech.github.io/speculab-mcp/">
+  <meta property="og:image" content="assets/printable_test_card.png">
+
+  <!-- Favicon / Web App Icon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f0ff'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="app-nav" id="main-header">
+    <a href="#" class="brand-container" id="brand-link">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="brand-title">SpecuLab<span>-MCP</span></div>
+    </a>
+
+    <nav class="nav-links" id="main-nav">
+      <a href="#inspector-studio">Active Studio</a>
+      <a href="#evaluation-results">6-Method Results</a>
+      <a href="#agentic-loop">FastMCP Agent</a>
+      <a href="#benchmarks">Hardware SIMD</a>
+      <a href="#printable-card">Printable Kit</a>
+    </nav>
+
+    <div class="header-badges">
+      <span class="badge badge-ci-pass" title="GitHub Actions CI passing 21/21 tests">
+        <span class="dot"></span>
+        21/21 Tests Pass
+      </span>
+      <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp" target="_blank" rel="noopener noreferrer" class="badge badge-github" id="github-repo-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle; margin-right:4px;">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+        GitHub
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="hero-section">
+      <div class="hero-pill">
+        <span>⚡ OPENCV 5.0.0 • AWS GRAVITON NEOVERSE • FASTMCP • BEDROCK NOVA-LITE</span>
+      </div>
+      <h1 class="hero-title">
+        Autonomous Active Vision Metrology<br>
+        <span class="cyan-gradient-text">Eliminating Specular Glare on Metallic Foils</span>
+      </h1>
+      <p class="hero-desc">
+        Specular reflection blinds traditional inspection systems on pharmaceutical blister packaging and battery pouch cells. 
+        SpecuLab-MCP combines <strong>sub-millimeter ArUco planar rectification</strong>, <strong>two-stage hysteresis glare gating</strong>, and <strong>Model Context Protocol (FastMCP)</strong> agentic loops to tilt viewpoints and fuse clear perspectives autonomously.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#inspector-studio" class="btn btn-primary" id="btn-explore-studio">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+          </svg>
+          Launch Interactive Studio
+        </a>
+        <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="btn-view-repo">
+          View GitHub Repository
+        </a>
+      </div>
+
+      <!-- Real Metrics Grid -->
+      <div class="metrics-grid">
+        <div class="metric-card accent-emerald">
+          <div class="metric-value">5 / 7 (71.4%)</div>
+          <div class="metric-label">Strict Defect Recall</div>
+          <div class="metric-sub">100% of resolvable defects &ge; 0.35 mm (vs 0/7 passive)</div>
+        </div>
+        <div class="metric-card accent-cyan">
+          <div class="metric-value">6 / 7 (85.7%)</div>
+          <div class="metric-label">Safety Capture Rate</div>
+          <div class="metric-sub">Includes quarantine escalation for persistent glare</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">0 / 3 (0.0%)</div>
+          <div class="metric-label">Clean False Rejects</div>
+          <div class="metric-sub">Eliminates 100% of passive glare false alarms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">204.5 ms</div>
+          <div class="metric-label">Pipeline Latency</div>
+          <div class="metric-sub">SIMD accelerated by Arm KleidiCV & AVX2 kernels</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Inspector Studio -->
+    <section class="container" id="inspector-studio">
+      <div class="section-header">
+        <span class="section-tag">// INTERACTIVE MULTI-VIEW METROLOGY STUDIO</span>
+        <h2 class="section-title">Experience Autonomous Glare Healing Live</h2>
+        <p class="section-subtitle">
+          Select an adversarial held-out specimen below. Compare the blinded primary camera frame against our USAC-MAGSAC homography fused active canvas.
+        </p>
+      </div>
+
+      <div class="studio-card">
+        <!-- Toolbar -->
+        <div class="studio-toolbar">
+          <div class="specimen-pills">
+            <span class="pills-label">HELD-OUT SPECIMEN:</span>
+            <button class="specimen-pill active" data-specimen="specimen_06" id="pill-sp06">06: Overlap Trap</button>
+            <button class="specimen-pill" data-specimen="specimen_07" id="pill-sp07">07: Blur Trap</button>
+            <button class="specimen-pill" data-specimen="specimen_08" id="pill-sp08">08: 2-Pass Fusion</button>
+            <button class="specimen-pill" data-specimen="specimen_09" id="pill-sp09">09: Disagreement</button>
+            <button class="specimen-pill" data-specimen="specimen_10" id="pill-sp10">10: Omnidirectional</button>
+            <button class="specimen-pill" data-specimen="specimen_12" id="pill-sp12">12: Clean Pristine</button>
+          </div>
+
+          <div class="view-mode-tabs">
+            <button class="mode-tab active" data-mode="active_healed" id="tab-active">Active Healed (Slider)</button>
+            <button class="mode-tab" data-mode="view_0" id="tab-view0">View 0 (Glared)</button>
+            <button class="mode-tab" data-mode="view_1" id="tab-view1">View 1</button>
+            <button class="mode-tab" data-mode="view_2" id="tab-view2">View 2</button>
+          </div>
+        </div>
+
+        <!-- Viewport with Interactive Split Handle -->
+        <div class="studio-viewport">
+          <div class="inspection-canvas-wrapper" id="canvas-wrapper">
+            <!-- Base Image (View 0: Glared) -->
+            <img src="assets/specimens/specimen_06/view_0.jpg" alt="Base Inspection View" class="inspection-img" id="canvas-base-img">
+
+            <!-- Overlay Image (Active Healed View) -->
+            <div class="overlay-healed" id="overlay-healed" style="width: 50%;">
+              <img src="assets/specimens/specimen_06/view_2.jpg" alt="Active Healed View" id="canvas-healed-img">
+            </div>
+
+            <!-- Split Line & Handle -->
+            <div class="split-handle" id="split-handle" style="left: 50%;">
+              <div class="split-knob">
+                &#x2194;
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Telemetry HUD -->
+        <div class="studio-hud">
+          <div class="hud-item">
+            <span class="hud-label">Ground Truth Target</span>
+            <span class="hud-value" id="hud-ground-truth">0.95 mm Puncture at (950, 400)</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Residual Glare %</span>
+            <span class="hud-value" id="hud-glare">0.0%</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Active Views Fused</span>
+            <span class="hud-value" id="hud-views-fused">View 2 (View 1 Rejected for 94% Overlap)</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Inspection Verdict</span>
+            <div id="hud-verdict" class="hud-verdict-pill verdict-reject">REJECT — Defect Confirmed</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6-Method Empirical Benchmark Results -->
+    <section class="container" id="evaluation-results">
+      <div class="section-header">
+        <span class="section-tag">// EMPIRICAL 6-METHOD BENCHMARK</span>
+        <h2 class="section-title">Defeating the Glare Barrier Across 10 Held-Out Cards</h2>
+        <p class="section-subtitle">
+          Evaluated on our 14-specimen Automated Procedural Optical Testbed under realistic twin-lobe LED striations, anisotropic brushed foil, and multi-angle perspective tilts.
+        </p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="metrology-table">
+          <thead>
+            <tr>
+              <th>Inspection Method</th>
+              <th>Strict Recall</th>
+              <th>Safety Capture (incl. Escalate)</th>
+              <th>Clean False Rejects</th>
+              <th>Unresolved Occlusions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>1A_passive_unmasked</code></td>
+              <td>1/7 (14.3%)</td>
+              <td>1/7 (14.3%)</td>
+              <td style="color:var(--accent-crimson); font-weight:700;">3/3 (100% False Alarms)</td>
+              <td>0/10</td>
+            </tr>
+            <tr>
+              <td><code>1B_passive_glare_masked</code></td>
+              <td style="color:var(--accent-crimson); font-weight:700;">0/7 (0.0% Blind)</td>
+              <td>0/7 (0.0% Blind)</td>
+              <td>0/3 (0.0%)</td>
+              <td>0/10</td>
+            </tr>
+            <tr>
+              <td><code>2A_naive_view1</code></td>
+              <td>2/7 (28.6%)</td>
+              <td>3/7 (42.9%)</td>
+              <td>0/3 (0.0%)</td>
+              <td>1/10</td>
+            </tr>
+            <tr>
+              <td><code>2B_greedy_lowest_glare</code></td>
+              <td>3/7 (42.9%)</td>
+              <td>4/7 (57.1%)</td>
+              <td>0/3 (0.0%)</td>
+              <td>1/10</td>
+            </tr>
+            <tr class="highlight">
+              <td><code>2C_active_deterministic</code></td>
+              <td style="color:var(--accent-emerald);"><strong>5/7 (71.4%)*</strong></td>
+              <td style="color:var(--accent-cyan);"><strong>6/7 (85.7%)*</strong></td>
+              <td style="color:var(--accent-emerald);"><strong>0/3 (0.0%)</strong></td>
+              <td>1/10</td>
+            </tr>
+            <tr class="highlight">
+              <td><code>2D_active_bedrock_live</code></td>
+              <td style="color:var(--accent-emerald);"><strong>5/7 (71.4%)*</strong></td>
+              <td style="color:var(--accent-cyan);"><strong>6/7 (85.7%)*</strong></td>
+              <td style="color:var(--accent-emerald);"><strong>0/3 (0.0%)</strong></td>
+              <td>1/10</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-dim); margin-top:0.75rem;">
+        *Note: 5/7 strict recall represents <strong>5/5 (100.0%) of all physically resolvable defects &ge; 0.35 mm</strong>. Specimen 11 contains an intentional 0.22 mm sub-threshold micro-dimple below optical resolution limits, honestly documented across all methods.
+      </p>
+    </section>
+
+    <!-- FastMCP Agentic Workflow Visualizer -->
+    <section class="container" id="agentic-loop">
+      <div class="section-header">
+        <span class="section-tag">// AGENTIC VISION & MODEL CONTEXT PROTOCOL</span>
+        <h2 class="section-title">FastMCP Atomic Tool Execution Pipeline</h2>
+        <p class="section-subtitle">
+          Amazon Bedrock (Nova-Lite) dynamically drives the vision perception-decision-action loop using 3 atomic, stateless FastMCP tools with strict schema validation.
+        </p>
+      </div>
+
+      <div class="agent-flow-grid">
+        <!-- Interactive Step Timeline -->
+        <div class="flow-card">
+          <h3 style="margin-bottom: 1.25rem;">Specimen Decision Timeline</h3>
+          <div id="agent-timeline-container">
+            <!-- Injected via app.js -->
+          </div>
+        </div>
+
+        <!-- MCP Tool Schema Inspector -->
+        <div class="flow-card">
+          <h3 style="margin-bottom: 0.5rem;">FastMCP Tool Interface</h3>
+          <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:1rem;">
+            Stateless protocol registered at <code>src/mcp_server.py</code>:
+          </p>
+          <pre class="json-box"><code>// 1. rank_candidate_views
+{
+  "name": "rank_candidate_views",
+  "inputSchema": {
+    "primary_image_path": "string (filepath)",
+    "candidate_image_paths": ["string (filepath)"]
+  },
+  "returns": {
+    "ranked_candidates": [
+      {
+        "candidate_path": "assets/specimens/specimen_06/view_2.jpg",
+        "glare_percentage": 6.5,
+        "overlap_percentage_with_primary": 0.0,
+        "relative_sharpness_ratio": 1.05,
+        "is_blurry": false,
+        "multi_criteria_rank": 1
+      }
+    ]
+  }
+}
+
+// 2. fuse_candidate_view
+// Applies USAC_MAGSAC, radiometric gain matching, 
+// and 11 px feather blending. Max fusions = 2.
+
+// 3. finalize_inspection_or_escalate
+// Detects defects via Blackhat 61x61 morphological closing.
+// Halts line with ESCALATE if glare > 2.0% threshold.</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hardware Acceleration & Micro-Benchmarks -->
+    <section class="container" id="benchmarks">
+      <div class="section-header">
+        <span class="section-tag">// AUTHENTIC MICRO-BENCHMARKS & ARM ACCELERATION</span>
+        <h2 class="section-title">Hardware SIMD Kernel Profiling</h2>
+        <p class="section-subtitle" id="bench-profile-desc">
+          1-Thread SIMD Isolation: Evaluates single-core vector efficiency without multi-core scheduling noise.
+        </p>
+      </div>
+
+      <div class="view-mode-tabs" style="width:fit-content; margin-bottom:1.5rem;">
+        <button class="mode-tab active" id="tab-bench-1thread">1-Thread SIMD Isolation</button>
+        <button class="mode-tab" id="tab-bench-nthread">4-Thread Multi-Core Scaling</button>
+      </div>
+
+      <div class="benchmark-cards">
+        <div class="bench-card" style="grid-column: span 2;">
+          <h3 class="bench-title">Empirical Stage Latency & Speedup</h3>
+          <div class="bench-subtitle">OpenCV 5.0.0 SIMD Optimized vs Unoptimized Baseline</div>
+          <div id="benchmark-bars-container">
+            <!-- Injected via app.js -->
+          </div>
+        </div>
+
+        <div class="bench-card">
+          <h3 class="bench-title">Hardware Label Honesty</h3>
+          <div class="bench-subtitle">Committed JSON Provenance</div>
+          <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.7;">
+            <strong>Local Baseline Host:</strong><br>
+            <code>Windows-11-10.0.26300-SP0 (AMD64)</code> running OpenCV 5.0.0 AVX2 SIMD.
+          </p>
+          <hr style="border:none; border-top:1px solid rgba(255,255,255,0.08); margin:1rem 0;">
+          <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.7;">
+            <strong>Automated AWS Graviton Neoverse CI:</strong><br>
+            Runs on real 64-bit Arm (<code>ubuntu-24.04-arm</code> aarch64) in GitHub Actions.
+          </p>
+          <div style="margin-top:1.25rem;">
+            <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp/actions/runs/40449770476" target="_blank" rel="noopener noreferrer" class="badge badge-ci-pass" style="text-decoration:none;">
+              View Verified CI Run
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Printable Calibration Card & Metrology Spec -->
+    <section class="container" id="printable-card">
+      <div class="section-header">
+        <span class="section-tag">// PHYSICAL TESTBED & ARUCO CALIBRATION</span>
+        <h2 class="section-title">Sub-Millimeter Physical Calibration Kit</h2>
+        <p class="section-subtitle">
+          Download and print the canonical dual-ArUco card at 100% scale (no fit-to-page) to replicate active multi-view metrology in your physical laboratory.
+        </p>
+      </div>
+
+      <div class="studio-card" style="padding: 2rem;">
+        <div style="display:flex; flex-wrap:wrap; gap:2rem; align-items:center;">
+          <div style="flex:1; min-width:320px;">
+            <img src="assets/printable_test_card.png" alt="Printable ArUco Card" style="width:100%; border-radius:var(--radius-sm); border:1px solid rgba(255,255,255,0.1);">
+          </div>
+          <div style="flex:1; min-width:300px;">
+            <h3 style="margin-bottom:0.75rem;">Canonical Pixel & Physical Specs</h3>
+            <ul style="font-size:0.92rem; color:var(--text-muted); line-height:1.8; margin-left:1.2rem; margin-bottom:1.5rem;">
+              <li><strong>Active Card Canvas:</strong> 100.0 mm x 40.0 mm</li>
+              <li><strong>Resolution:</strong> 2000 px x 800 px (Nominal 20.0 px/mm scale)</li>
+              <li><strong>Primary Marker:</strong> ArUco ID 0 (400x400 px, 20x20 mm) at (100, 200)</li>
+              <li><strong>Secondary Marker:</strong> ArUco ID 1 (400x400 px, 20x20 mm) at (1500, 200)</li>
+              <li><strong>Central Foil ROI:</strong> 40.0 mm x 20.0 mm (800x400 px)</li>
+              <li><strong>ORB Texture Bands:</strong> Deterministic high-frequency gradient bars</li>
+            </ul>
+            <a href="assets/printable_test_card.png" download="speculab_printable_test_card.png" class="btn btn-primary" id="btn-download-card">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/>
+              </svg>
+              Download High-Res Card PNG (2000x800)
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <div class="brand-container">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-title">SpecuLab<span>-MCP</span></div>
+      </div>
+
+      <div class="footer-links">
+        <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+        <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp/blob/main/DEVPOST_SUBMISSION.md" target="_blank" rel="noopener noreferrer">Devpost Submission</a>
+        <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp/blob/main/TECHNICAL_REPORT.md" target="_blank" rel="noopener noreferrer">Technical Report</a>
+        <a href="https://github.com/arulmuruganmcse2024-tech/speculab-mcp/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+      </div>
+
+      <p style="font-size:0.82rem; color:var(--text-dim);">
+        Built for the OpenCV AI Competition & AWS Bedrock Hackathon with OpenCV 5.0.0, Cloud-Optimized OpenCV Library (COOL), and FastMCP.
+      </p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
