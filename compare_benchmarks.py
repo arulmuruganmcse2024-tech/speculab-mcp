@@ -13,6 +13,14 @@ import os
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
+# Auto-bootstrap project virtual environment if invoked from external python
+try:
+    from src.bootstrap import ensure_venv
+    ensure_venv()
+except ImportError:
+    pass
+
+
 
 def is_baseline_label(label: str) -> bool:
     """Check if label indicates baseline or unoptimized run."""

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "resize_ms": 2.179,
-    "cvt_color_ms": 0.735,
-    "gaussian_blur_ms": 0.845,
-    "aruco_detect_ms": 6.769,
-    "warp_perspective_ms": 5.744,
+    "resize_ms": 1.437,
+    "cvt_color_ms": 0.319,
+    "gaussian_blur_ms": 0.319,
+    "aruco_detect_ms": 6.183,
+    "warp_perspective_ms": 5.859,
     "rectification_mode": "DUAL_MARKER_8PT",
     "native_px_per_mm": 18.76,
     "native_mm_per_px": 0.0533,

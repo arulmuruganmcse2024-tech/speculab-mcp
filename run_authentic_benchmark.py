@@ -13,6 +13,13 @@ import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+# Auto-bootstrap project virtual environment if invoked from external python
+try:
+    from src.bootstrap import ensure_venv
+    ensure_venv()
+except ImportError:
+    pass
+
 import cv2
 import numpy as np
 

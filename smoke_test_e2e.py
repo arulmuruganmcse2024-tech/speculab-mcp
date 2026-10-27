@@ -13,6 +13,14 @@ import shutil
 import subprocess
 import sys
 import tempfile
+
+# Auto-bootstrap project virtual environment if invoked from external python
+try:
+    from src.bootstrap import ensure_venv
+    ensure_venv()
+except ImportError:
+    pass
+
 import cv2
 import numpy as np
 

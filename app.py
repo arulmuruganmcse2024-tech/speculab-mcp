@@ -13,8 +13,16 @@ import glob
 import hashlib
 import json
 import os
+import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
+
+# Auto-bootstrap project virtual environment if invoked from external python
+try:
+    from src.bootstrap import ensure_venv
+    ensure_venv()
+except ImportError:
+    pass
 
 import cv2
 import numpy as np
@@ -297,4 +305,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        from streamlit.runtime.scriptrunner import get_script_run_ctx
+
+        if get_script_run_ctx() is None:
+            from streamlit.web import cli as stcli
+
+            sys.argv = ["streamlit", "run", __file__]
+            sys.exit(stcli.main())
+        else:
+            main()
+    except Exception:
+        main()

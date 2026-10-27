@@ -11,10 +11,19 @@ import os
 import sys
 from typing import Any, Dict, List, Tuple
 
+# Ensure repository root is on sys.path and auto-bootstrap venv
+_repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _repo_root not in sys.path:
+    sys.path.insert(0, _repo_root)
+
+try:
+    from src.bootstrap import ensure_venv
+    ensure_venv()
+except ImportError:
+    pass
+
 import cv2
 import numpy as np
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from scripts.generate_printable_card import generate_card
 from src.vision_engine import PlanarActiveVisionEngine, load_image_exif_safe
