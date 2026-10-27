@@ -13,6 +13,8 @@
 ---
 
 ## 3. Short Description
+> 🌐 **Live Interactive Website & Metrology Studio**: [https://arulmuruganmcse2024-tech.github.io/speculab-mcp/](https://arulmuruganmcse2024-tech.github.io/speculab-mcp/)
+
 SpecuLab-MCP eliminates specular glare occlusions on reflective metallic foil seals through autonomous multi-view active vision. Built with OpenCV 5.0.0 and Cloud-Optimized OpenCV Library (COOL) on AWS Graviton (accelerated by Arm KleidiCV SIMD), it integrates sub-millimeter planar ArUco calibration, dual-marker metric rectification, hysteresis penumbra glare gating, KleidiCV-accelerated morphology, and an Agentic Vision Model Context Protocol (MCP) toolset orchestrated by Amazon Bedrock with strict human-in-the-loop supervisor quarantine.
 
 Evaluated on a 14-specimen Automated Procedural Optical Testbed (paired with a printable dual-ArUco physical card kit), SpecuLab-MCP achieves a **5/7 (71.4%) strict defect recall** and a **6/7 (85.7%) safety capture rate** under extreme specular occlusion—completely outperforming traditional passive inspection which scored **0/7 (0.0%) recall**.

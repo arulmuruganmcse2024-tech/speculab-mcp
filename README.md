@@ -1,5 +1,10 @@
 # SpecuLab-MCP: Autonomous Active Vision Metrology with OpenCV 5.0.0, Cloud-Optimized OpenCV Library (COOL) on AWS Graviton, and Agentic FastMCP
 
+[![Live GitHub Pages Showcase](https://img.shields.io/badge/Live_Showcase-GitHub_Pages-00f0ff?style=for-the-badge&logo=github)](https://arulmuruganmcse2024-tech.github.io/speculab-mcp/)
+[![CI Build & Benchmarks](https://img.shields.io/badge/CI_Matrix-21%2F21_Passing-00f59b?style=for-the-badge&logo=githubactions)](https://github.com/arulmuruganmcse2024-tech/speculab-mcp/actions)
+
+> 🌐 **Interactive Live Website & Metrology Studio**: [https://arulmuruganmcse2024-tech.github.io/speculab-mcp/](https://arulmuruganmcse2024-tech.github.io/speculab-mcp/)
+
 SpecuLab-MCP is an industrial active-vision metrology system for high-specularity metallic foil surface inspection. By integrating OpenCV 5.0.0 and the Cloud-Optimized OpenCV Library (COOL) on AWS Graviton (accelerated by Arm KleidiCV SIMD) with Agentic Vision via the Model Context Protocol (FastMCP) and Amazon Bedrock, it autonomously eliminates specular glare through bounded, multi-view active homography fusion and detects micro-scale defects using a single unrigged morphological blackhat detector.
 
 ---
